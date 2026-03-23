@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .logout { margin-top: 20px; text-align: right; }
+        button { padding: 8px 16px; background-color: #dc3545; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #c82333; }
+        .error { color: red; margin-top: 10px; }
+        .refresh { margin-bottom: 15px; background-color: #28a745; }
+        .refresh:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Admin Dashboard</h1>
+    <div class="logout">
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <h2>Students</h2>
+    <button class="refresh" onclick="loadStudents()">Refresh Students</button>
+    <div id="studentsTable"></div>
+
+    <h2>Courses</h2>
+    <button class="refresh" onclick="loadCourses()">Refresh Courses</button>
+    <div id="coursesTable"></div>
+
+    <h2>Enrollments</h2>
+    <button class="refresh" onclick="loadEnrollments()">Refresh Enrollments</button>
+    <div id="enrollmentsTable"></div>
+
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080/api';
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    if (!token || role !== 'ADMIN') {
+        window.location.href = '/index.html';
+    }
+
+    async function loadStudents() {
+        try {
+            const res = await fetch(`${API_BASE}/admin/students?page=0&size=100`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const students = data.content;
+                if (students.length === 0) {
+                    document.getElementById('studentsTable').innerHTML = '<p>No students found.</p>';
+                    return;
+                }
+                let html = '<table><thead><tr>' +
+                    '<th>Roll Number</th><th>Aadhaar</th><th>Name</th><th>Full Name</th>' +
+                    '<th>Email</th><th>Department</th><th>Course</th><th>Academic Year</th><th>Role</th>' +
+                    '</tr></thead><tbody>';
+                students.forEach(s => {
+                    html += `<tr>
+                        <td>${escapeHtml(s.rollNumber)}</td>
+                        <td>${escapeHtml(s.aadhaarNumber)}</td>
+                        <td>${escapeHtml(s.name)}</td>
+                        <td>${escapeHtml(s.fullName)}</td>
+                        <td>${escapeHtml(s.email)}</td>
+                        <td>${escapeHtml(s.department?.name || s.department)}</td>
+                        <td>${escapeHtml(s.selectedCourse)}</td>
+                        <td>${s.academicYear}</td>
+                        <td>${escapeHtml(s.role)}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('studentsTable').innerHTML = html;
+            } else {
+                throw new Error('Failed to load students');
+            }
+        } catch (err) {
+            document.getElementById('error').innerText = 'Error loading students: ' + err.message;
+        }
+    }
+
+    async function loadCourses() {
+        try {
+            const res = await fetch(`${API_BASE}/admin/courses`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const courses = await res.json();
+                if (courses.length === 0) {
+                    document.getElementById('coursesTable').innerHTML = '<p>No courses found.</p>';
+                    return;
+                }
+                let html = '<table><thead><tr>' +
+                    '<th>Code</th><th>Title</th><th>Department</th><th>Teacher 1</th><th>Teacher 2</th><th>Credits</th><th>Description</th>' +
+                    '</tr></thead><tbody>';
+                courses.forEach(c => {
+                    html += `<tr>
+                        <td>${escapeHtml(c.code)}</td>
+                        <td>${escapeHtml(c.title)}</td>
+                        <td>${escapeHtml(c.department?.name || c.department)}</td>
+                        <td>${escapeHtml(c.teacher1)}</td>
+                        <td>${escapeHtml(c.teacher2)}</td>
+                        <td>${c.credits}</td>
+                        <td>${escapeHtml(c.description)}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('coursesTable').innerHTML = html;
+            } else {
+                throw new Error('Failed to load courses');
+            }
+        } catch (err) {
+            document.getElementById('error').innerText = 'Error loading courses: ' + err.message;
+        }
+    }
+
+    async function loadEnrollments() {
+        try {
+            const res = await fetch(`${API_BASE}/admin/enrollments`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const enrollments = await res.json();
+                if (enrollments.length === 0) {
+                    document.getElementById('enrollmentsTable').innerHTML = '<p>No enrollments found.</p>';
+                    return;
+                }
+                let html = '<table><thead><tr>' +
+                    '<th>Student Roll</th><th>Student Name</th><th>Department</th><th>Course Code</th><th>Course Title</th>' +
+                    '<th>Teacher(s)</th><th>Enrollment Date</th><th>Grade</th>' +
+                    '</tr></thead><tbody>';
+                enrollments.forEach(e => {
+                    const teacherStr = `${e.course?.teacher1} / ${e.course?.teacher2}`;
+                    html += `<tr>
+                        <td>${escapeHtml(e.student?.rollNumber)}</td>
+                        <td>${escapeHtml(e.student?.name)}</td>
+                        <td>${escapeHtml(e.student?.department?.name)}</td>
+                        <td>${escapeHtml(e.course?.code)}</td>
+                        <td>${escapeHtml(e.course?.title)}</td>
+                        <td>${escapeHtml(teacherStr)}</td>
+                        <td>${e.enrollmentDate ? new Date(e.enrollmentDate).toLocaleString() : ''}</td>
+                        <td>${escapeHtml(e.grade)}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('enrollmentsTable').innerHTML = html;
+            } else {
+                throw new Error('Failed to load enrollments');
+            }
+        } catch (err) {
+            document.getElementById('error').innerText = 'Error loading enrollments: ' + err.message;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        window.location.href = '/index.html';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    loadStudents();
+    loadCourses();
+    loadEnrollments();
+</script>
+</body>
+</html>

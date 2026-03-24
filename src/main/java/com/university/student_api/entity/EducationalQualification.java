@@ -1,19 +1,14 @@
-package com.university.student_api.dto;
+package com.university.student_api.entity;
 
-import java.util.List;
+import jakarta.persistence.*;
 
-public class RegisterRequest {
-    private String aadhaarNumber;
-    private String name;
-    private String fullName;
-    private String address;
-    private String gender;
-    private String departmentCode;
-    private List<String> selectedCourses;
-    private String password;
-    private String email;
+@Entity
+@Table(name = "educational_qualifications")
+public class EducationalQualification {
 
-    // Educational fields
+    @Id
+    private String studentRollNumber;
+
     private String tenthBoard;
     private int tenthYear;
     private double tenthPercentage;
@@ -36,33 +31,14 @@ public class RegisterRequest {
     private int itiYear;              // NEW
     private double itiPercentage;     // NEW
 
+    private boolean verified = false;
+
+    // Constructors
+    public EducationalQualification() {}
+
     // Getters and setters
-    public String getAadhaarNumber() { return aadhaarNumber; }
-    public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
-
-    public String getDepartmentCode() { return departmentCode; }
-    public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
-
-    public List<String> getSelectedCourses() { return selectedCourses; }
-    public void setSelectedCourses(List<String> selectedCourses) { this.selectedCourses = selectedCourses; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getStudentRollNumber() { return studentRollNumber; }
+    public void setStudentRollNumber(String studentRollNumber) { this.studentRollNumber = studentRollNumber; }
 
     public String getTenthBoard() { return tenthBoard; }
     public void setTenthBoard(String tenthBoard) { this.tenthBoard = tenthBoard; }
@@ -108,4 +84,7 @@ public class RegisterRequest {
 
     public double getItiPercentage() { return itiPercentage; }
     public void setItiPercentage(double itiPercentage) { this.itiPercentage = itiPercentage; }
+
+    public boolean isVerified() { return verified; }
+    public void setVerified(boolean verified) { this.verified = verified; }
 }

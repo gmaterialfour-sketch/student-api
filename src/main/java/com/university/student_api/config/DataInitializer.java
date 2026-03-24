@@ -1,19 +1,11 @@
 package com.university.student_api.config;
 
+import com.university.student_api.entity.*;
+import com.university.student_api.repository.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import com.university.student_api.entity.Course;
-import com.university.student_api.entity.Department;
-import com.university.student_api.entity.RollNumberSequence;
-import com.university.student_api.entity.Student;
-import com.university.student_api.repository.CourseRepository;
-import com.university.student_api.repository.DepartmentRepository;
-import com.university.student_api.repository.RollNumberSequenceRepository;
-import com.university.student_api.repository.StudentRepository;
-
-import jakarta.annotation.PostConstruct;
 
 @Component
 public class DataInitializer {
@@ -31,7 +23,7 @@ public class DataInitializer {
 
     @PostConstruct
     public void init() {
-        // ---------- Create Departments ----------
+        // Create departments
         Department cse = new Department("CSE", "Computer Science", null);
         Department eee = new Department("EEE", "Electrical Engineering", null);
         Department ece = new Department("ECE", "Electronics Engineering", null);
@@ -39,7 +31,7 @@ public class DataInitializer {
         departmentRepository.save(eee);
         departmentRepository.save(ece);
 
-        // ---------- Courses for CSE ----------
+        // Courses for CSE
         Course cse1 = new Course("CS101", "Theory of Computation", 3, "TOC", cse, "Prof. Smith", "Prof. Johnson");
         Course cse2 = new Course("CS102", "Data Structures", 3, "DS", cse, "Prof. Brown", "Prof. Davis");
         Course cse3 = new Course("CS103", "Algorithms", 3, "Algo", cse, "Prof. Wilson", "Prof. Martinez");
@@ -51,7 +43,7 @@ public class DataInitializer {
         courseRepository.save(cse4);
         courseRepository.save(cse5);
 
-        // ---------- Courses for EEE ----------
+        // Courses for EEE
         Course eee1 = new Course("EEE101", "Circuit Theory", 3, "CT", eee, "Prof. White", "Prof. Harris");
         Course eee2 = new Course("EEE102", "Electrical Machines", 3, "EM", eee, "Prof. Martin", "Prof. Thompson");
         Course eee3 = new Course("EEE103", "Power Systems", 3, "PS", eee, "Prof. Garcia", "Prof. Robinson");
@@ -63,7 +55,7 @@ public class DataInitializer {
         courseRepository.save(eee4);
         courseRepository.save(eee5);
 
-        // ---------- Courses for ECE ----------
+        // Courses for ECE
         Course ece1 = new Course("ECE101", "Digital Electronics", 3, "DE", ece, "Prof. Walker", "Prof. Hall");
         Course ece2 = new Course("ECE102", "Microprocessors", 3, "MP", ece, "Prof. Allen", "Prof. Young");
         Course ece3 = new Course("ECE103", "Communication Systems", 3, "CS", ece, "Prof. King", "Prof. Wright");
@@ -75,17 +67,17 @@ public class DataInitializer {
         courseRepository.save(ece4);
         courseRepository.save(ece5);
 
-        // ---------- Roll Number Sequence ----------
+        // Roll number sequence
         if (!rollNumberSequenceRepository.existsById(1L)) {
             rollNumberSequenceRepository.save(new RollNumberSequence(1L, 1000L));
         }
 
-        // ---------- Create 5 Admin Users ----------
+        // Create 5 admin users
         for (int i = 1; i <= 5; i++) {
             String rollNumber = String.format("ADMIN%03d", i);
             String email = String.format("admin%d@university.edu", i);
             String password = "admin" + i + "@2026";
-            String aadhaar = "ADMIN" + i + "_AADHAAR";   // unique dummy
+            String aadhaar = "ADMIN" + i + "_AADHAAR";
 
             if (!studentRepository.existsById(rollNumber)) {
                 Student admin = new Student();

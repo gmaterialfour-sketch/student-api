@@ -1,24 +1,11 @@
 package com.university.student_api.entity;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "students")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Student {
 
     @Id
@@ -30,20 +17,20 @@ public class Student {
     private String name;
     private String fullName;
     private String address;
-    private String gender;    // NEW
+    private String gender;
 
     @ManyToOne
     @JoinColumn(name = "department_code")
     private Department department;
 
-    private String selectedCourse;  // kept for backward compatibility
+    private String selectedCourse;
     private String email;
     private int academicYear;
 
     @JsonIgnore
     private String password;
 
-    private String role; // "ROLE_STUDENT" or "ROLE_ADMIN"
+    private String role;
 
     @JsonIgnore
     private int failedLoginAttempts = 0;
@@ -51,7 +38,10 @@ public class Student {
     @JsonIgnore
     private LocalDateTime lastFailedLoginTime;
 
-    // ----- Manual getters/setters (if Lombok fails) -----
+    // Constructors
+    public Student() {}
+
+    // Getters and setters
     public String getRollNumber() { return rollNumber; }
     public void setRollNumber(String rollNumber) { this.rollNumber = rollNumber; }
 

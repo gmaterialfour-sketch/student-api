@@ -1,19 +1,27 @@
 package com.university.student_api.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "roll_number_sequence")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class RollNumberSequence {
+
     @Id
-    private Long id; // always 1 (single row)
+    private Long id;
     private Long currentValue;
+
+    // Constructors
+    public RollNumberSequence() {}
+
+    public RollNumberSequence(Long id, Long currentValue) {
+        this.id = id;
+        this.currentValue = currentValue;
+    }
+
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getCurrentValue() { return currentValue; }
+    public void setCurrentValue(Long currentValue) { this.currentValue = currentValue; }
 }

@@ -6,28 +6,110 @@
     <title>Student Dashboard</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 1000px; margin: auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1200px; margin: auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1, h2 { color: #333; }
-        .card { background: #f9f9f9; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-        .info-row { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .label { font-weight: bold; width: 150px; }
-        .value { flex: 1; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .photo-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .edit-photo {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .edit-photo:hover { background: #007bff; }
+        .info-card {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .info-item { margin: 5px 0; }
+        .label { font-weight: bold; color: #555; }
+        .value { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #007bff; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
         .logout { text-align: right; margin-bottom: 20px; }
         button { padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #c82333; }
+        .btn-secondary { background-color: #28a745; margin-left: 10px; }
+        .btn-secondary:hover { background-color: #218838; }
+        input[type="file"] { display: none; }
+        .verified { color: green; font-weight: bold; }
+        .pending { color: orange; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="logout"><button onclick="logout()">Logout</button></div>
     <h1>Student Dashboard</h1>
-    <div id="profile"></div>
+
+    <div class="profile-header">
+        <div class="photo-container" id="photoContainer">
+            <img id="profilePhoto" src="" alt="Profile Photo">
+            <div class="edit-photo" onclick="document.getElementById('photoInput').click()">✎</div>
+        </div>
+        <div class="info-card" id="profileInfo"></div>
+    </div>
+
     <h2>Enrolled Courses</h2>
     <div id="enrollments"></div>
+
+    <h2>Attendance</h2>
+    <div id="attendanceTable"></div>
+
+    <h2>Educational Qualification Status</h2>
+    <div id="qualificationStatus"></div>
+
+    <h2>Upload Certificates</h2>
+    <div>
+        <label>Select Certificate Type:</label>
+        <select id="certType">
+            <option value="10TH">10th Marksheet</option>
+            <option value="12TH">12th Marksheet</option>
+            <option value="DIPLOMA">Diploma Certificate</option>
+            <option value="ITI">ITI Certificate</option>
+        </select>
+        <input type="file" id="certFile" accept="application/pdf">
+        <button onclick="uploadCertificate()" class="btn-secondary">Upload</button>
+    </div>
+    <h2>Uploaded Certificates</h2>
+    <div id="certificatesTable"></div>
+
+    <input type="file" id="photoInput" accept="image/*" style="display:none;">
 </div>
 
 <script>
@@ -44,19 +126,46 @@
         let deptName = student.department;
         if (student.department && typeof student.department === 'object') deptName = student.department.name;
         const html = `
-            <div class="card">
-                <div class="info-row"><span class="label">Roll Number:</span><span class="value">${escapeHtml(student.rollNumber)}</span></div>
-                <div class="info-row"><span class="label">Aadhaar:</span><span class="value">${escapeHtml(student.aadhaarNumber)}</span></div>
-                <div class="info-row"><span class="label">Name:</span><span class="value">${escapeHtml(student.name)}</span></div>
-                <div class="info-row"><span class="label">Full Name:</span><span class="value">${escapeHtml(student.fullName)}</span></div>
-                <div class="info-row"><span class="label">Email:</span><span class="value">${escapeHtml(student.email)}</span></div>
-                <div class="info-row"><span class="label">Address:</span><span class="value">${escapeHtml(student.address)}</span></div>
-                <div class="info-row"><span class="label">Gender:</span><span class="value">${escapeHtml(student.gender)}</span></div>
-                <div class="info-row"><span class="label">Department:</span><span class="value">${escapeHtml(deptName)}</span></div>
-                <div class="info-row"><span class="label">Academic Year:</span><span class="value">${student.academicYear}</span></div>
-            </div>`;
-        document.getElementById('profile').innerHTML = html;
+            <div class="info-item"><span class="label">Roll Number:</span> <span class="value">${escapeHtml(student.rollNumber)}</span></div>
+            <div class="info-item"><span class="label">Name:</span> <span class="value">${escapeHtml(student.name)}</span></div>
+            <div class="info-item"><span class="label">Full Name:</span> <span class="value">${escapeHtml(student.fullName)}</span></div>
+            <div class="info-item"><span class="label">Email:</span> <span class="value">${escapeHtml(student.email)}</span></div>
+            <div class="info-item"><span class="label">Address:</span> <span class="value">${escapeHtml(student.address)}</span></div>
+            <div class="info-item"><span class="label">Gender:</span> <span class="value">${escapeHtml(student.gender)}</span></div>
+            <div class="info-item"><span class="label">Department:</span> <span class="value">${escapeHtml(deptName)}</span></div>
+            <div class="info-item"><span class="label">Academic Year:</span> <span class="value">${student.academicYear}</span></div>
+        `;
+        document.getElementById('profileInfo').innerHTML = html;
     }
+
+    async function loadPhoto() {
+        try {
+            const res = await fetch(`${API_BASE}/student/photo`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('profilePhoto').src = url;
+            }
+        } catch(e) { console.log("No photo"); }
+    }
+
+    document.getElementById('photoInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`${API_BASE}/student/photo`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        if (res.ok) {
+            alert('Photo updated');
+            loadPhoto();
+        } else {
+            alert('Upload failed');
+        }
+    });
 
     async function loadEnrollments() {
         const res = await fetch(`${API_BASE}/student/enrollments`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -66,27 +175,95 @@
             document.getElementById('enrollments').innerHTML = '<p>You are not enrolled in any courses.</p>';
             return;
         }
-        let html = ' <thead> <tr> <th>Course Code</th> <th>Course Title</th> <th>Teacher(s)</th> <th>Enrollment Date</th> <th>Grade</th> </tr> </thead> <tbody>';
+        let html = '<thead><tr><th>Course Code</th><th>Course Title</th><th>Teacher(s)</th><th>Enrollment Date</th><th>Grade</th></tr></thead><tbody>';
         enrollments.forEach(e => {
             let courseTitle = e.course ? e.course.title : '';
             let teacherStr = e.course ? `${e.course.teacher1} / ${e.course.teacher2}` : '';
             let dateStr = e.enrollmentDate ? new Date(e.enrollmentDate).toLocaleString() : '';
-            html += `<tr>
-                        <td>${escapeHtml(e.id?.courseCode || '')}</td>
-                        <td>${escapeHtml(courseTitle)}</td>
-                        <td>${escapeHtml(teacherStr)}</td>
-                        <td>${dateStr}</td>
-                        <td>${escapeHtml(e.grade || 'Not graded')}</td>
-                     </tr>`;
+            html += `<tr><td>${escapeHtml(e.id?.courseCode || '')}</td><td>${escapeHtml(courseTitle)}</td><td>${escapeHtml(teacherStr)}</td><td>${dateStr}</td><td>${escapeHtml(e.grade || 'Not graded')}</td></tr>`;
         });
         html += '</tbody>';
         document.getElementById('enrollments').innerHTML = `<table>${html}</table>`;
     }
 
+    async function loadAttendance() {
+        const res = await fetch(`${API_BASE}/student/attendance`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Attendance load failed');
+        const attendances = await res.json();
+        if (attendances.length === 0) {
+            document.getElementById('attendanceTable').innerHTML = '<p>No attendance records found.</p>';
+            return;
+        }
+        let html = '<thead><tr><th>Course</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+        attendances.forEach(a => {
+            let courseTitle = a.course ? a.course.title : '';
+            let status = a.present ? 'Present' : 'Absent';
+            html += `<tr><td>${escapeHtml(courseTitle)}</td><td>${new Date(a.date).toLocaleDateString()}</td><td>${status}</td></tr>`;
+        });
+        html += '</tbody>';
+        document.getElementById('attendanceTable').innerHTML = `<table>${html}</table>`;
+    }
+
+    async function loadQualificationStatus() {
+        try {
+            const res = await fetch(`${API_BASE}/student/qualification`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+                const q = await res.json();
+                const statusHtml = `<div class="${q.verified ? 'verified' : 'pending'}">${q.verified ? 'Verified ✓' : 'Pending Verification ⏳'}</div>`;
+                document.getElementById('qualificationStatus').innerHTML = `<p>Qualification Status: ${statusHtml}</p>`;
+            } else {
+                document.getElementById('qualificationStatus').innerHTML = '<p>Qualification not yet submitted.</p>';
+            }
+        } catch(e) { console.log(e); }
+    }
+
+    async function uploadCertificate() {
+        const certType = document.getElementById('certType').value;
+        const fileInput = document.getElementById('certFile');
+        if (!fileInput.files.length) {
+            alert('Please select a file');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('type', certType);
+        formData.append('file', fileInput.files[0]);
+        const res = await fetch(`${API_BASE}/student/certificate`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        const msg = await res.text();
+        alert(msg);
+        if (res.ok) loadCertificates();
+    }
+
+    async function loadCertificates() {
+        const res = await fetch(`${API_BASE}/student/certificates`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const certs = await res.json();
+        if (certs.length === 0) {
+            document.getElementById('certificatesTable').innerHTML = '<p>No certificates uploaded.</p>';
+            return;
+        }
+        let html = '<thead><tr><th>Type</th><th>File Name</th><th>Upload Date</th><th>Status</th></tr></thead><tbody>';
+        certs.forEach(c => {
+            html += `<tr><td>${escapeHtml(c.certificateType)}</td><td>${escapeHtml(c.fileName)}</td><td>${new Date(c.uploadDate).toLocaleString()}</td><td class="${c.verified ? 'verified' : 'pending'}">${c.verified ? 'Verified ✓' : 'Pending ⏳'}</td></tr>`;
+        });
+        html += '</tbody>';
+        document.getElementById('certificatesTable').innerHTML = `<table>${html}</table>`;
+    }
+
     function logout() { localStorage.removeItem('token'); localStorage.removeItem('role'); window.location.href = '/index.html'; }
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-    loadProfile().catch(err => console.error(err));
-    loadEnrollments().catch(err => console.error(err));
+
+    loadProfile();
+    loadPhoto();
+    loadEnrollments();
+    loadAttendance();
+    loadQualificationStatus();
+    loadCertificates();
 </script>
 </body>
 </html>

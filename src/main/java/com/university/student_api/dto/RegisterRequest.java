@@ -1,21 +1,20 @@
 package com.university.student_api.dto;
 
+import java.util.List;
+
 public class RegisterRequest {
-    private String rollNumber;
     private String aadhaarNumber;
     private String name;
     private String fullName;
     private String address;
+    private String gender;               // NEW
     private String departmentCode;
-    private String selectedCourse;
+    private List<String> selectedCourses; // NEW: list of course codes
     private String password;
     private String email;
     private int academicYear;
 
     // Getters and setters
-    public String getRollNumber() { return rollNumber; }
-    public void setRollNumber(String rollNumber) { this.rollNumber = rollNumber; }
-
     public String getAadhaarNumber() { return aadhaarNumber; }
     public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
 
@@ -28,11 +27,14 @@ public class RegisterRequest {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
     public String getDepartmentCode() { return departmentCode; }
     public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
 
-    public String getSelectedCourse() { return selectedCourse; }
-    public void setSelectedCourse(String selectedCourse) { this.selectedCourse = selectedCourse; }
+    public List<String> getSelectedCourses() { return selectedCourses; }
+    public void setSelectedCourses(List<String> selectedCourses) { this.selectedCourses = selectedCourses; }
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }

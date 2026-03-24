@@ -30,19 +30,20 @@ public class Student {
     private String name;
     private String fullName;
     private String address;
+    private String gender;    // NEW
 
     @ManyToOne
     @JoinColumn(name = "department_code")
     private Department department;
 
-    private String selectedCourse;
+    private String selectedCourse;  // kept for backward compatibility
     private String email;
     private int academicYear;
 
     @JsonIgnore
     private String password;
 
-    private String role;
+    private String role; // "ROLE_STUDENT" or "ROLE_ADMIN"
 
     @JsonIgnore
     private int failedLoginAttempts = 0;
@@ -50,7 +51,7 @@ public class Student {
     @JsonIgnore
     private LocalDateTime lastFailedLoginTime;
 
-    // ----- MANUAL GETTERS AND SETTERS -----
+    // ----- Manual getters/setters (if Lombok fails) -----
     public String getRollNumber() { return rollNumber; }
     public void setRollNumber(String rollNumber) { this.rollNumber = rollNumber; }
 
@@ -65,6 +66,9 @@ public class Student {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public Department getDepartment() { return department; }
     public void setDepartment(Department department) { this.department = department; }

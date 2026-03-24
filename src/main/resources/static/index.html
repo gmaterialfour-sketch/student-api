@@ -5,19 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 500px; margin: auto; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .error { color: red; margin-top: 10px; }
-        .success { color: green; margin-top: 10px; }
-        .toggle { margin-top: 20px; text-align: center; }
-        .toggle a { color: #007bff; cursor: pointer; text-decoration: underline; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 750px;
+            padding: 30px;
+            margin: 20px;
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        input, select, .checkbox-group {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        .error { color: #e74c3c; margin-top: 10px; font-size: 14px; }
+        .success { color: #2ecc71; margin-top: 10px; font-size: 14px; }
+        .toggle { text-align: center; margin-top: 20px; }
+        .toggle a { color: #667eea; cursor: pointer; text-decoration: underline; }
         .form { display: none; }
         .active-form { display: block; }
+        .radio-group { display: flex; gap: 20px; align-items: center; }
+        .radio-group label { display: inline-flex; align-items: center; gap: 5px; font-weight: normal; margin-bottom: 0; }
+        hr { margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -28,50 +83,29 @@
     <div id="registerForm" class="form active-form">
         <h2>Register</h2>
         <form id="register">
+            <div class="form-group"><label>Aadhaar Number:</label><input type="text" id="regAadhaar" required></div>
+            <div class="form-group"><label>Name:</label><input type="text" id="regName" required></div>
+            <div class="form-group"><label>Full Name:</label><input type="text" id="regFullName" required></div>
+            <div class="form-group"><label>Address:</label><input type="text" id="regAddress" required></div>
+            <div class="form-group"><label>Email:</label><input type="email" id="regEmail" required></div>
+            <div class="form-group"><label>Academic Year (1-4):</label><input type="number" id="regAcademicYear" min="1" max="4" required></div>
             <div class="form-group">
-                <label>Roll Number:</label>
-                <input type="text" id="regRollNumber" required>
-            </div>
-            <div class="form-group">
-                <label>Aadhaar Number:</label>
-                <input type="text" id="regAadhaar" required>
-            </div>
-            <div class="form-group">
-                <label>Name:</label>
-                <input type="text" id="regName" required>
-            </div>
-            <div class="form-group">
-                <label>Full Name:</label>
-                <input type="text" id="regFullName" required>
-            </div>
-            <div class="form-group">
-                <label>Address:</label>
-                <input type="text" id="regAddress" required>
-            </div>
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="regEmail" required>
-            </div>
-            <div class="form-group">
-                <label>Academic Year (1,2,3,4):</label>
-                <input type="number" id="regAcademicYear" min="1" max="4" required>
+                <label>Gender:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="gender" value="Male"> Male</label>
+                    <label><input type="radio" name="gender" value="Female"> Female</label>
+                    <label><input type="radio" name="gender" value="Other"> Other</label>
+                </div>
             </div>
             <div class="form-group">
                 <label>Department:</label>
-                <select id="regDepartment" required>
-                    <option value="">Select Department</option>
-                </select>
+                <select id="regDepartment" required><option value="">Select Department</option></select>
             </div>
             <div class="form-group">
-                <label>Course:</label>
-                <select id="regCourse" required>
-                    <option value="">Select Course</option>
-                </select>
+                <label>Courses (select multiple):</label>
+                <div id="regCourses" class="checkbox-group"></div>
             </div>
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="regPassword" required>
-            </div>
+            <div class="form-group"><label>Password:</label><input type="password" id="regPassword" required></div>
             <button type="submit">Register</button>
         </form>
         <div id="registerMessage"></div>
@@ -82,14 +116,8 @@
     <div id="loginForm" class="form">
         <h2>Login</h2>
         <form id="login">
-            <div class="form-group">
-                <label>Roll Number:</label>
-                <input type="text" id="loginRollNumber" required>
-            </div>
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" id="loginPassword" required>
-            </div>
+            <div class="form-group"><label>Roll Number:</label><input type="text" id="loginRollNumber" required></div>
+            <div class="form-group"><label>Password:</label><input type="password" id="loginPassword" required></div>
             <button type="submit">Login</button>
         </form>
         <div id="loginMessage"></div>
@@ -100,80 +128,76 @@
 <script>
     const API_BASE = 'http://localhost:8080/api';
 
-    // Load departments on page load
     async function loadDepartments() {
-        try {
-            const res = await fetch(`${API_BASE}/departments`);
-            if (!res.ok) throw new Error('Failed to load departments');
-            const departments = await res.json();
-            const deptSelect = document.getElementById('regDepartment');
-            deptSelect.innerHTML = '<option value="">Select Department</option>';
-            departments.forEach(dept => {
-                const option = document.createElement('option');
-                option.value = dept.code;
-                option.textContent = dept.name;
-                deptSelect.appendChild(option);
-            });
-        } catch (err) {
-            console.error('Error loading departments:', err);
-            document.getElementById('registerMessage').innerHTML = '<div class="error">Failed to load departments. Please refresh.</div>';
-        }
+        const res = await fetch(`${API_BASE}/departments`);
+        const departments = await res.json();
+        const deptSelect = document.getElementById('regDepartment');
+        deptSelect.innerHTML = '<option value="">Select Department</option>';
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept.code;
+            option.textContent = dept.name;
+            deptSelect.appendChild(option);
+        });
     }
 
-    // When department changes, load courses for that department using the public endpoint
     document.getElementById('regDepartment').addEventListener('change', async (e) => {
         const deptCode = e.target.value;
-        const courseSelect = document.getElementById('regCourse');
-        if (!deptCode) {
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
-            return;
-        }
+        const coursesDiv = document.getElementById('regCourses');
+        if (!deptCode) { coursesDiv.innerHTML = '<em>Select a department first</em>'; return; }
         try {
             const res = await fetch(`${API_BASE}/public/courses/by-department/${deptCode}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const courses = await res.json();
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
-            if (courses.length === 0) {
-                courseSelect.innerHTML = '<option value="">No courses available</option>';
-                return;
-            }
+            if (courses.length === 0) { coursesDiv.innerHTML = '<em>No courses available</em>'; return; }
+            coursesDiv.innerHTML = '';
             courses.forEach(course => {
-                const option = document.createElement('option');
-                option.value = course.code;
-                option.textContent = `${course.title} (${course.teacher1} / ${course.teacher2})`;
-                courseSelect.appendChild(option);
+                const label = document.createElement('label');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = course.code;
+                cb.name = 'courses';
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(` ${course.title} (${course.teacher1} / ${course.teacher2})`));
+                coursesDiv.appendChild(label);
             });
         } catch (err) {
-            console.error('Failed to load courses:', err);
-            courseSelect.innerHTML = '<option value="">Error loading courses</option>';
+            coursesDiv.innerHTML = '<em>Error loading courses</em>';
         }
     });
 
-    // Register submission
     document.getElementById('register').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const selectedCourses = Array.from(document.querySelectorAll('input[name="courses"]:checked')).map(cb => cb.value);
+        if (selectedCourses.length === 0) {
+            document.getElementById('registerMessage').innerHTML = '<div class="error">Please select at least one course.</div>';
+            return;
+        }
+        const gender = document.querySelector('input[name="gender"]:checked');
+        if (!gender) {
+            document.getElementById('registerMessage').innerHTML = '<div class="error">Please select gender.</div>';
+            return;
+        }
         const data = {
-            rollNumber: document.getElementById('regRollNumber').value,
             aadhaarNumber: document.getElementById('regAadhaar').value,
             name: document.getElementById('regName').value,
             fullName: document.getElementById('regFullName').value,
             address: document.getElementById('regAddress').value,
             email: document.getElementById('regEmail').value,
             academicYear: parseInt(document.getElementById('regAcademicYear').value),
+            gender: gender.value,
             departmentCode: document.getElementById('regDepartment').value,
-            selectedCourse: document.getElementById('regCourse').value,
+            selectedCourses: selectedCourses,
             password: document.getElementById('regPassword').value
         };
         try {
             const res = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
             });
             const text = await res.text();
             if (res.ok) {
                 document.getElementById('registerMessage').innerHTML = `<div class="success">${text}</div>`;
                 document.getElementById('register').reset();
+                document.querySelectorAll('input[name="courses"]').forEach(cb => cb.checked = false);
                 setTimeout(() => showLogin(), 2000);
             } else {
                 document.getElementById('registerMessage').innerHTML = `<div class="error">${text}</div>`;
@@ -183,28 +207,16 @@
         }
     });
 
-    // Login submission (redirects based on role)
     document.getElementById('login').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = {
-            rollNumber: document.getElementById('loginRollNumber').value,
-            password: document.getElementById('loginPassword').value
-        };
+        const data = { rollNumber: document.getElementById('loginRollNumber').value, password: document.getElementById('loginPassword').value };
         try {
-            const res = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            const res = await fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             if (res.ok) {
                 const auth = await res.json();
                 localStorage.setItem('token', auth.token);
                 localStorage.setItem('role', auth.role);
-                if (auth.role === 'ADMIN') {
-                    window.location.href = '/admin-dashboard.html';
-                } else {
-                    window.location.href = '/dashboard.html';
-                }
+                window.location.href = auth.role === 'ADMIN' ? '/admin-dashboard.html' : '/dashboard.html';
             } else {
                 const error = await res.text();
                 document.getElementById('loginMessage').innerHTML = `<div class="error">${error}</div>`;
@@ -217,13 +229,12 @@
     function showRegister() {
         document.getElementById('registerForm').classList.add('active-form');
         document.getElementById('loginForm').classList.remove('active-form');
+        loadDepartments();
     }
-
     function showLogin() {
         document.getElementById('loginForm').classList.add('active-form');
         document.getElementById('registerForm').classList.remove('active-form');
     }
-
     loadDepartments();
 </script>
 </body>

@@ -1,11 +1,19 @@
 package com.university.student_api.config;
 
-import com.university.student_api.entity.*;
-import com.university.student_api.repository.*;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import com.university.student_api.entity.Course;
+import com.university.student_api.entity.Department;
+import com.university.student_api.entity.RollNumberSequence;
+import com.university.student_api.entity.Student;
+import com.university.student_api.repository.CourseRepository;
+import com.university.student_api.repository.DepartmentRepository;
+import com.university.student_api.repository.RollNumberSequenceRepository;
+import com.university.student_api.repository.StudentRepository;
+
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class DataInitializer {
@@ -16,6 +24,8 @@ public class DataInitializer {
     private DepartmentRepository departmentRepository;
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private RollNumberSequenceRepository rollNumberSequenceRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -65,20 +75,34 @@ public class DataInitializer {
         courseRepository.save(ece4);
         courseRepository.save(ece5);
 
-        // ---------- Admin user ----------
-        if (!studentRepository.existsById("ADMIN001")) {
-            Student admin = new Student();
-            admin.setRollNumber("ADMIN001");
-            admin.setAadhaarNumber("000000000000");
-            admin.setName("System");
-            admin.setFullName("System Administrator");
-            admin.setAddress("University HQ");
-            admin.setDepartment(cse); // assign any department
-            admin.setSelectedCourse("N/A");
-            admin.setPassword(passwordEncoder.encode("admin@2026"));
-            admin.setRole("ROLE_ADMIN");
-            studentRepository.save(admin);
-            System.out.println("Admin user created → rollNumber: ADMIN001 , password: admin@2026");
+        // ---------- Roll Number Sequence ----------
+        if (!rollNumberSequenceRepository.existsById(1L)) {
+            rollNumberSequenceRepository.save(new RollNumberSequence(1L, 1000L));
+        }
+
+        // ---------- Create 5 Admin Users ----------
+        for (int i = 1; i <= 5; i++) {
+            String rollNumber = String.format("ADMIN%03d", i);
+            String email = String.format("admin%d@university.edu", i);
+            String password = "admin" + i + "@2026";
+            String aadhaar = "ADMIN" + i + "_AADHAAR";   // unique dummy
+
+            if (!studentRepository.existsById(rollNumber)) {
+                Student admin = new Student();
+                admin.setRollNumber(rollNumber);
+                admin.setAadhaarNumber(aadhaar);
+                admin.setName("System");
+                admin.setFullName("System Administrator " + i);
+                admin.setAddress("University HQ");
+                admin.setDepartment(cse);
+                admin.setSelectedCourse("N/A");
+                admin.setEmail(email);
+                admin.setAcademicYear(0);
+                admin.setPassword(passwordEncoder.encode(password));
+                admin.setRole("ROLE_ADMIN");
+                studentRepository.save(admin);
+                System.out.println("Admin user created → rollNumber: " + rollNumber + ", password: " + password);
+            }
         }
     }
 }

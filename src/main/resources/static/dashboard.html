@@ -5,33 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 600px; margin: auto; }
-        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #f9f9f9; }
-        .info { margin-bottom: 10px; }
-        .label { font-weight: bold; }
-        .logout { margin-top: 20px; }
-        button { padding: 8px 16px; background-color: #dc3545; color: white; border: none; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
+        .container { max-width: 1000px; margin: auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .card { background: #f9f9f9; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .info-row { display: flex; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .label { font-weight: bold; width: 150px; }
+        .value { flex: 1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .logout { text-align: right; margin-bottom: 20px; }
+        button { padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #c82333; }
-        .error { color: red; }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="logout"><button onclick="logout()">Logout</button></div>
     <h1>Student Dashboard</h1>
-    <div id="dashboard" class="card">
-        <div class="info"><span class="label">Name:</span> <span id="name"></span></div>
-        <div class="info"><span class="label">Roll Number:</span> <span id="rollNumber"></span></div>
-        <div class="info"><span class="label">Course:</span> <span id="course"></span></div>
-        <div class="info"><span class="label">Department:</span> <span id="department"></span></div>
-        <div class="info"><span class="label">Full Name:</span> <span id="fullName"></span></div>
-        <div class="info"><span class="label">Address:</span> <span id="address"></span></div>
-        <div class="info"><span class="label">Academic Year:</span> <span id="academicYear"></span></div>
-    </div>
-    <div class="logout">
-        <button onclick="logout()">Logout</button>
-    </div>
-    <div id="error" class="error"></div>
+    <div id="profile"></div>
+    <h2>Enrolled Courses</h2>
+    <div id="enrollments"></div>
 </div>
 
 <script>
@@ -39,42 +35,58 @@
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    if (!token) {
-        window.location.href = '/index.html';
+    if (!token || role !== 'STUDENT') window.location.href = '/index.html';
+
+    async function loadProfile() {
+        const res = await fetch(`${API_BASE}/student/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Profile load failed');
+        const student = await res.json();
+        let deptName = student.department;
+        if (student.department && typeof student.department === 'object') deptName = student.department.name;
+        const html = `
+            <div class="card">
+                <div class="info-row"><span class="label">Roll Number:</span><span class="value">${escapeHtml(student.rollNumber)}</span></div>
+                <div class="info-row"><span class="label">Aadhaar:</span><span class="value">${escapeHtml(student.aadhaarNumber)}</span></div>
+                <div class="info-row"><span class="label">Name:</span><span class="value">${escapeHtml(student.name)}</span></div>
+                <div class="info-row"><span class="label">Full Name:</span><span class="value">${escapeHtml(student.fullName)}</span></div>
+                <div class="info-row"><span class="label">Email:</span><span class="value">${escapeHtml(student.email)}</span></div>
+                <div class="info-row"><span class="label">Address:</span><span class="value">${escapeHtml(student.address)}</span></div>
+                <div class="info-row"><span class="label">Gender:</span><span class="value">${escapeHtml(student.gender)}</span></div>
+                <div class="info-row"><span class="label">Department:</span><span class="value">${escapeHtml(deptName)}</span></div>
+                <div class="info-row"><span class="label">Academic Year:</span><span class="value">${student.academicYear}</span></div>
+            </div>`;
+        document.getElementById('profile').innerHTML = html;
     }
 
-    async function fetchProfile() {
-        try {
-            const res = await fetch(`${API_BASE}/student/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const student = await res.json();
-                document.getElementById('name').innerText = student.name;
-                document.getElementById('rollNumber').innerText = student.rollNumber;
-                document.getElementById('course').innerText = student.selectedCourse;
-                document.getElementById('department').innerText = student.department?.name || student.department;
-                document.getElementById('fullName').innerText = student.fullName;
-                document.getElementById('address').innerText = student.address;
-                document.getElementById('academicYear').innerText = student.academicYear;
-            } else {
-                throw new Error('Failed to load profile');
-            }
-        } catch (err) {
-            document.getElementById('error').innerText = 'Error loading dashboard. Please login again.';
-            localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            setTimeout(() => window.location.href = '/index.html', 2000);
+    async function loadEnrollments() {
+        const res = await fetch(`${API_BASE}/student/enrollments`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Enrollments load failed');
+        const enrollments = await res.json();
+        if (enrollments.length === 0) {
+            document.getElementById('enrollments').innerHTML = '<p>You are not enrolled in any courses.</p>';
+            return;
         }
+        let html = ' <thead> <tr> <th>Course Code</th> <th>Course Title</th> <th>Teacher(s)</th> <th>Enrollment Date</th> <th>Grade</th> </tr> </thead> <tbody>';
+        enrollments.forEach(e => {
+            let courseTitle = e.course ? e.course.title : '';
+            let teacherStr = e.course ? `${e.course.teacher1} / ${e.course.teacher2}` : '';
+            let dateStr = e.enrollmentDate ? new Date(e.enrollmentDate).toLocaleString() : '';
+            html += `<tr>
+                        <td>${escapeHtml(e.id?.courseCode || '')}</td>
+                        <td>${escapeHtml(courseTitle)}</td>
+                        <td>${escapeHtml(teacherStr)}</td>
+                        <td>${dateStr}</td>
+                        <td>${escapeHtml(e.grade || 'Not graded')}</td>
+                     </tr>`;
+        });
+        html += '</tbody>';
+        document.getElementById('enrollments').innerHTML = `<table>${html}</table>`;
     }
 
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        window.location.href = '/index.html';
-    }
-
-    fetchProfile();
+    function logout() { localStorage.removeItem('token'); localStorage.removeItem('role'); window.location.href = '/index.html'; }
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    loadProfile().catch(err => console.error(err));
+    loadEnrollments().catch(err => console.error(err));
 </script>
 </body>
 </html>

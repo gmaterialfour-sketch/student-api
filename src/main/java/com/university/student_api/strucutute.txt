@@ -1,47 +1,45 @@
 student-api/
-├── pom.xml
-├── mvnw / mvnw.cmd
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/university/student_api/
-│       │       ├── StudentApiApplication.java
-│       │       ├── config/
-│       │       │   └── DataInitializer.java
-│       │       ├── controller/
-│       │       │   ├── AdminController.java
-│       │       │   ├── AuthController.java
-│       │       │   ├── CourseController.java
-│       │       │   ├── DepartmentController.java
-│       │       │   ├── EnrollmentController.java
-│       │       │   └── StudentController.java
-│       │       ├── dto/
-│       │       │   ├── AuthResponse.java
-│       │       │   ├── CourseRequest.java
-│       │       │   ├── EnrollmentRequest.java
-│       │       │   ├── LoginRequest.java
-│       │       │   └── RegisterRequest.java
-│       │       ├── entity/
-│       │       │   ├── Course.java
-│       │       │   ├── Department.java
-│       │       │   ├── Enrollment.java
-│       │       │   ├── EnrollmentId.java
-│       │       │   └── Student.java
-│       │       ├── repository/
-│       │       │   ├── CourseRepository.java
-│       │       │   ├── DepartmentRepository.java
-│       │       │   ├── EnrollmentRepository.java
-│       │       │   └── StudentRepository.java
-│       │       ├── security/
-│       │       │   ├── CustomUserDetailsService.java
-│       │       │   ├── JwtFilter.java
-│       │       │   ├── JwtUtil.java
-│       │       │   └── SecurityConfig.java
-│       │       └── service/
-│       │           └── AuthService.java
-│       └── resources/
-│           ├── application.properties
-│           └── static/
-│               ├── index.html
-│               ├── dashboard.html
-│               └── admin-dashboard.html
+├── src/main/java/com/university/student_api/
+│   ├── StudentApiApplication.java
+│   ├── config/
+│   │   └── DataInitializer.java
+│   ├── controller/
+│   │   ├── AdminController.java
+│   │   ├── AuthController.java
+│   │   ├── CourseController.java
+│   │   ├── DepartmentController.java
+│   │   ├── EnrollmentController.java
+│   │   ├── PublicCourseController.java
+│   │   └── StudentController.java
+│   ├── dto/
+│   │   ├── AuthResponse.java
+│   │   ├── CourseRequest.java
+│   │   ├── EnrollmentRequest.java
+│   │   ├── LoginRequest.java
+│   │   └── RegisterRequest.java
+│   ├── entity/
+│   │   ├── Course.java
+│   │   ├── Department.java
+│   │   ├── Enrollment.java
+│   │   ├── EnrollmentId.java
+│   │   ├── RollNumberSequence.java
+│   │   └── Student.java
+│   ├── repository/
+│   │   ├── CourseRepository.java
+│   │   ├── DepartmentRepository.java
+│   │   ├── EnrollmentRepository.java
+│   │   ├── RollNumberSequenceRepository.java
+│   │   └── StudentRepository.java
+│   ├── security/
+│   │   ├── CustomUserDetailsService.java
+│   │   ├── JwtFilter.java
+│   │   ├── JwtUtil.java
+│   │   └── SecurityConfig.java
+│   └── service/
+│       └── AuthService.java
+└── src/main/resources/
+    ├── application.properties
+    └── static/
+        ├── admin-dashboard.html
+        ├── dashboard.html
+        └── index.html

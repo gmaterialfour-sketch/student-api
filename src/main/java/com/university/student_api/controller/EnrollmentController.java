@@ -1,5 +1,21 @@
 package com.university.student_api.controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.university.student_api.dto.EnrollmentRequest;
 import com.university.student_api.entity.Course;
 import com.university.student_api.entity.Enrollment;
@@ -8,13 +24,6 @@ import com.university.student_api.entity.Student;
 import com.university.student_api.repository.CourseRepository;
 import com.university.student_api.repository.EnrollmentRepository;
 import com.university.student_api.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -87,4 +96,17 @@ public class EnrollmentController {
     public List<Enrollment> getAllEnrollments() {
         return enrollmentRepository.findAll();
     }
+
+   @PutMapping("/admin/enrollments/{studentRollNumber}/{courseCode}/grade")
+public ResponseEntity<?> updateGrade(
+        @PathVariable String studentRollNumber,
+        @PathVariable String courseCode,
+        @RequestBody Map<String, String> payload) {
+    EnrollmentId id = new EnrollmentId(studentRollNumber, courseCode);
+    Enrollment enrollment = enrollmentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+    enrollment.setGrade(payload.get("grade"));
+    enrollmentRepository.save(enrollment);
+    return ResponseEntity.ok("Grade updated");
+}
 }

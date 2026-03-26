@@ -1,15 +1,11 @@
 package com.university.student_api.repository;
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import com.university.student_api.entity.Enrollment;
 import com.university.student_api.entity.EnrollmentId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-@Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, EnrollmentId> {
-    List<Enrollment> findByIdStudentRollNumber(String studentRollNumber);
-    List<Enrollment> findByIdCourseCode(String courseCode);
+    // Finds all enrollments for a given student roll number
+    List<Enrollment> findByStudentRollNumber(String rollNumber);
 }

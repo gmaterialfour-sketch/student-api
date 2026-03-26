@@ -5,13 +5,10 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "student_photos")
 public class StudentPhoto {
-
     @Id
     private String studentRollNumber;
-
     @Lob
     private byte[] imageData;
-
     private String contentType;
 
     // Constructors

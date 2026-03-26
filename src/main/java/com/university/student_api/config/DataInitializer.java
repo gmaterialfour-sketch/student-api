@@ -2,98 +2,144 @@ package com.university.student_api.config;
 
 import com.university.student_api.entity.*;
 import com.university.student_api.repository.*;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataInitializer {
+public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private StudentRepository studentRepository;
+
     @Autowired
     private DepartmentRepository departmentRepository;
+
     @Autowired
     private CourseRepository courseRepository;
+
     @Autowired
-    private RollNumberSequenceRepository rollNumberSequenceRepository;
+    private RollNumberSequenceRepository sequenceRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostConstruct
-    public void init() {
-        // Create departments
-        Department cse = new Department("CSE", "Computer Science", null);
-        Department eee = new Department("EEE", "Electrical Engineering", null);
-        Department ece = new Department("ECE", "Electronics Engineering", null);
-        departmentRepository.save(cse);
-        departmentRepository.save(eee);
-        departmentRepository.save(ece);
+    @Override
+    public void run(String... args) throws Exception {
+        // Create departments if none exist
+        if (departmentRepository.count() == 0) {
+            Department cs = new Department();
+            cs.setCode("CS");
+            cs.setName("Computer Science");
+            departmentRepository.save(cs);
 
-        // Courses for CSE
-        Course cse1 = new Course("CS101", "Theory of Computation", 3, "TOC", cse, "Prof. Smith", "Prof. Johnson");
-        Course cse2 = new Course("CS102", "Data Structures", 3, "DS", cse, "Prof. Brown", "Prof. Davis");
-        Course cse3 = new Course("CS103", "Algorithms", 3, "Algo", cse, "Prof. Wilson", "Prof. Martinez");
-        Course cse4 = new Course("CS104", "Operating Systems", 3, "OS", cse, "Prof. Anderson", "Prof. Taylor");
-        Course cse5 = new Course("CS105", "Computer Networks", 3, "CN", cse, "Prof. Thomas", "Prof. Moore");
-        courseRepository.save(cse1);
-        courseRepository.save(cse2);
-        courseRepository.save(cse3);
-        courseRepository.save(cse4);
-        courseRepository.save(cse5);
+            Department eee = new Department();
+            eee.setCode("EEE");
+            eee.setName("Electrical & Electronics Engineering");
+            departmentRepository.save(eee);
 
-        // Courses for EEE
-        Course eee1 = new Course("EEE101", "Circuit Theory", 3, "CT", eee, "Prof. White", "Prof. Harris");
-        Course eee2 = new Course("EEE102", "Electrical Machines", 3, "EM", eee, "Prof. Martin", "Prof. Thompson");
-        Course eee3 = new Course("EEE103", "Power Systems", 3, "PS", eee, "Prof. Garcia", "Prof. Robinson");
-        Course eee4 = new Course("EEE104", "Control Systems", 3, "CS", eee, "Prof. Clark", "Prof. Rodriguez");
-        Course eee5 = new Course("EEE105", "Renewable Energy", 3, "RE", eee, "Prof. Lewis", "Prof. Lee");
-        courseRepository.save(eee1);
-        courseRepository.save(eee2);
-        courseRepository.save(eee3);
-        courseRepository.save(eee4);
-        courseRepository.save(eee5);
+            Department mech = new Department();
+            mech.setCode("ME");
+            mech.setName("Mechanical Engineering");
+            departmentRepository.save(mech);
 
-        // Courses for ECE
-        Course ece1 = new Course("ECE101", "Digital Electronics", 3, "DE", ece, "Prof. Walker", "Prof. Hall");
-        Course ece2 = new Course("ECE102", "Microprocessors", 3, "MP", ece, "Prof. Allen", "Prof. Young");
-        Course ece3 = new Course("ECE103", "Communication Systems", 3, "CS", ece, "Prof. King", "Prof. Wright");
-        Course ece4 = new Course("ECE104", "VLSI Design", 3, "VLSI", ece, "Prof. Scott", "Prof. Green");
-        Course ece5 = new Course("ECE105", "Embedded Systems", 3, "ES", ece, "Prof. Baker", "Prof. Adams");
-        courseRepository.save(ece1);
-        courseRepository.save(ece2);
-        courseRepository.save(ece3);
-        courseRepository.save(ece4);
-        courseRepository.save(ece5);
+            // Roll number sequences
+            sequenceRepository.save(new RollNumberSequence("CS", 0));
+            sequenceRepository.save(new RollNumberSequence("EEE", 0));
+            sequenceRepository.save(new RollNumberSequence("ME", 0));
 
-        // Roll number sequence
-        if (!rollNumberSequenceRepository.existsById(1L)) {
-            rollNumberSequenceRepository.save(new RollNumberSequence(1L, 1000L));
+            // Courses for CS
+            Course java = new Course();
+            java.setCode("CS101");
+            java.setTitle("Java Programming");
+            java.setDescription("Object-oriented programming with Java");
+            java.setCredits(4);
+            java.setTeacher1("Dr. Smith");
+            java.setTeacher2("Prof. Johnson");
+            java.setDepartment(cs);
+            courseRepository.save(java);
+
+            Course web = new Course();
+            web.setCode("CS102");
+            web.setTitle("Web Development");
+            web.setDescription("HTML, CSS, JavaScript");
+            web.setCredits(3);
+            web.setTeacher1("Dr. Lee");
+            web.setDepartment(cs);
+            courseRepository.save(web);
+
+            // Courses for EEE
+            Course circuits = new Course();
+            circuits.setCode("EEE201");
+            circuits.setTitle("Circuit Theory");
+            circuits.setDescription("Electrical circuit analysis");
+            circuits.setCredits(4);
+            circuits.setTeacher1("Prof. Kumar");
+            circuits.setDepartment(eee);
+            courseRepository.save(circuits);
+
+            Course machines = new Course();
+            machines.setCode("EEE202");
+            machines.setTitle("Electrical Machines");
+            machines.setDescription("AC/DC machines");
+            machines.setCredits(4);
+            machines.setTeacher1("Dr. Rajesh");
+            machines.setDepartment(eee);
+            courseRepository.save(machines);
+
+            // Courses for MECH
+            Course thermo = new Course();
+            thermo.setCode("ME301");
+            thermo.setTitle("Thermodynamics");
+            thermo.setDescription("Heat and work");
+            thermo.setCredits(4);
+            thermo.setTeacher1("Dr. Sharma");
+            thermo.setDepartment(mech);
+            courseRepository.save(thermo);
+
+            Course fluid = new Course();
+            fluid.setCode("ME302");
+            fluid.setTitle("Fluid Mechanics");
+            fluid.setDescription("Fluid dynamics");
+            fluid.setCredits(4);
+            fluid.setTeacher1("Prof. Gupta");
+            fluid.setDepartment(mech);
+            courseRepository.save(fluid);
         }
 
-        // Create 5 admin users
-        for (int i = 1; i <= 5; i++) {
-            String rollNumber = String.format("ADMIN%03d", i);
-            String email = String.format("admin%d@university.edu", i);
-            String password = "admin" + i + "@2026";
-            String aadhaar = "ADMIN" + i + "_AADHAAR";
-
-            if (!studentRepository.existsById(rollNumber)) {
+        // Create admin users if none exist
+        if (studentRepository.count() == 0) {
+            for (int i = 1; i <= 5; i++) {
                 Student admin = new Student();
-                admin.setRollNumber(rollNumber);
-                admin.setAadhaarNumber(aadhaar);
-                admin.setName("System");
-                admin.setFullName("System Administrator " + i);
-                admin.setAddress("University HQ");
-                admin.setDepartment(cse);
-                admin.setSelectedCourse("N/A");
-                admin.setEmail(email);
-                admin.setAcademicYear(0);
-                admin.setPassword(passwordEncoder.encode(password));
-                admin.setRole("ROLE_ADMIN");
+                admin.setRollNumber("ADMIN00" + i);
+                admin.setName("Admin " + i);
+                admin.setFullName("Administrator " + i);
+                admin.setEmail("admin" + i + "@university.com");
+                admin.setPassword(passwordEncoder.encode("admin" + i + "@2026"));
+                admin.setRole(Role.ADMIN);
+                admin.setFailedLoginAttempts(0);
+                admin.setAadhaarNumber("10000000" + i);
+                admin.setAcademicYear(2026);
+                admin.setAddress("Admin Office");
+                admin.setGender("Other");
+                admin.setQualificationType(QualificationType.TWELFTH);
+                admin.setTenthBoard("N/A");
+                admin.setTenthYear(0);
+                admin.setTenthPercentage(0.0);
+                admin.setTwelfthBoard("N/A");
+                admin.setTwelfthYear(0);
+                admin.setTwelfthPercentage(0.0);
+                admin.setTwelfthStream("N/A");
+                admin.setItiTrade("N/A");
+                admin.setItiYear(0);
+                admin.setItiPercentage(0.0);
+                admin.setDiplomaBranch("N/A");
+                admin.setDiplomaCredits(0);
+                admin.setDiplomaYear(0);
+                admin.setDiplomaPercentage(0.0);
+                admin.setSelectedCourses(null);
                 studentRepository.save(admin);
-                System.out.println("Admin user created → rollNumber: " + rollNumber + ", password: " + password);
             }
         }
     }

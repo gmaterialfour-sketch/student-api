@@ -74,17 +74,11 @@
         .active-form { display: block; }
         .radio-group { display: flex; gap: 20px; align-items: center; }
         .radio-group label { display: inline-flex; align-items: center; gap: 5px; font-weight: normal; margin-bottom: 0; }
-        hr { margin: 20px 0; }
-        .qualification-group { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; }
-        .cert-group { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; }
-        .otp-group { display: flex; gap: 10px; }
-        .otp-group input { flex: 1; }
-        .otp-group button { width: auto; padding: 10px 20px; background: #28a745; }
-        .resend { background: none; color: #007bff; text-decoration: underline; cursor: pointer; margin-top: 10px; }
         .btn-next { background-color: #28a745; margin-top: 10px; }
         .btn-prev { background-color: #6c757d; margin-top: 10px; }
         .flex-buttons { display: flex; gap: 10px; }
         .flex-buttons button { flex: 1; }
+        .cert-group { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -95,8 +89,8 @@
     <div id="loginForm" class="form active-form">
         <h2>Login</h2>
         <form id="login">
-            <div class="form-group"><label>Roll Number:</label><input type="text" id="loginRollNumber" required></div>
-            <div class="form-group"><label>Password:</label><input type="password" id="loginPassword" required></div>
+            <div class="form-group"><label>Roll Number:</label><input type="text" id="loginRollNumber" autocomplete="username" required></div>
+            <div class="form-group"><label>Password:</label><input type="password" id="loginPassword" autocomplete="current-password" required></div>
             <button type="submit">Login</button>
         </form>
         <div id="loginMessage"></div>
@@ -109,7 +103,10 @@
         <div id="step0" class="step active">
             <h3>Step 1: Basic Information</h3>
             <form id="step0Form">
-                <div class="form-group"><label>Aadhaar Number:</label><input type="text" id="regAadhaar" required></div>
+                <div class="form-group">
+                    <label>Aadhaar Number (9 digits):</label>
+                    <input type="text" id="regAadhaar" maxlength="9" pattern="\d{9}" required title="Aadhaar must be exactly 9 digits">
+                </div>
                 <div class="form-group"><label>Name:</label><input type="text" id="regName" required></div>
                 <div class="form-group"><label>Full Name:</label><input type="text" id="regFullName" required></div>
                 <div class="form-group"><label>Address:</label><input type="text" id="regAddress" required></div>
@@ -126,7 +123,7 @@
                     <label>Qualification Type:</label>
                     <select id="qualType" required>
                         <option value="">Select</option>
-                        <option value="12TH">12th (Plus Two)</option>
+                        <option value="TWELFTH">12th (Plus Two)</option>
                         <option value="ITI">ITI</option>
                         <option value="DIPLOMA">Diploma</option>
                     </select>
@@ -158,34 +155,14 @@
                 <label>Courses (select multiple):</label>
                 <div id="regCourses" class="checkbox-group"></div>
             </div>
-            <div class="form-group"><label>Password:</label><input type="password" id="regPassword" required></div>
-            <div class="cert-group">
-                <h3>Upload Certificates</h3>
-                <div id="certUploads"></div>
-            </div>
+            <div class="form-group"><label>Password:</label><input type="password" id="regPassword" autocomplete="new-password" required></div>
+            <div class="cert-group" id="certUploads"></div>
             <div class="form-group"><label>Profile Photo (optional):</label><input type="file" id="regPhoto" accept="image/*"></div>
             <div class="flex-buttons">
                 <button type="button" class="btn-prev" onclick="goToStep1()">Back</button>
-                <button type="button" class="btn-next" onclick="nextStep()">Next: Verify Email</button>
+                <button type="button" class="btn-next" onclick="submitRegistration()">Register</button>
             </div>
             <div id="step2Message"></div>
-        </div>
-
-        <div id="step3" class="step">
-            <h3>Step 4: Email Verification</h3>
-            <p>We have sent a 6‑digit OTP to <span id="otpEmail"></span>.</p>
-            <div class="form-group">
-                <label>Enter OTP:</label>
-                <div class="otp-group">
-                    <input type="text" id="otpInput" maxlength="6" placeholder="123456">
-                    <button type="button" id="verifyOtpBtn" onclick="verifyOtp()">Verify OTP</button>
-                </div>
-                <div class="resend" onclick="resendOtp()">Resend OTP</div>
-            </div>
-            <div id="otpMessage"></div>
-            <div class="toggle" style="margin-top: 20px;">
-                <a onclick="goBackToStep2()">← Back to registration</a>
-            </div>
         </div>
     </div>
 </div>
@@ -193,46 +170,20 @@
 <script>
     const API_BASE = 'http://localhost:8080/api';
     let registrationData = {
-        aadhaarNumber: '',
-        name: '',
-        fullName: '',
-        address: '',
-        email: '',
-        gender: '',
-        qualificationType: '',
-        selectedCourses: [],
-        departmentCode: '',
-        password: '',
-        tenthBoard: '',
-        tenthYear: 0,
-        tenthPercentage: 0,
-        twelfthBoard: '',
-        twelfthYear: 0,
-        twelfthPercentage: 0,
-        twelfthStream: '',
-        itiTrade: '',
-        itiYear: 0,
-        itiPercentage: 0,
-        diplomaBranch: '',
-        diplomaCredits: 0,
-        diplomaYear: 0,
-        diplomaPercentage: 0
+        aadhaarNumber: '', name: '', fullName: '', address: '', email: '', gender: '', qualificationType: '',
+        selectedCourses: [], departmentCode: '', password: '',
+        tenthBoard: '', tenthYear: 0, tenthPercentage: 0,
+        twelfthBoard: '', twelfthYear: 0, twelfthPercentage: 0, twelfthStream: '',
+        itiTrade: '', itiYear: 0, itiPercentage: 0,
+        diplomaBranch: '', diplomaCredits: 0, diplomaYear: 0, diplomaPercentage: 0
     };
-    let registrationFiles = {
-        photo: null,
-        cert10: null,
-        cert12: null,
-        certIti: null,
-        certDiploma: null
-    };
+    let registrationFiles = { photo: null, cert10: null, cert12: null, certIti: null, certDiploma: null };
 
-    // Helper to switch steps
     function showStep(stepId) {
         document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
         document.getElementById(stepId).classList.add('active');
     }
 
-    // Step 0 to Step 1: store basic info and qualification type
     function goToStep1() {
         const aadhaar = document.getElementById('regAadhaar').value;
         const name = document.getElementById('regName').value;
@@ -242,6 +193,10 @@
         const genderElem = document.querySelector('input[name="gender"]:checked');
         const qualType = document.getElementById('qualType').value;
 
+        if (!/^\d{9}$/.test(aadhaar)) {
+            document.getElementById('step0Message').innerHTML = '<div class="error">Aadhaar number must be exactly 9 digits.</div>';
+            return;
+        }
         if (!aadhaar || !name || !fullName || !address || !email || !genderElem || !qualType) {
             document.getElementById('step0Message').innerHTML = '<div class="error">Please fill all fields.</div>';
             return;
@@ -259,9 +214,8 @@
         registrationData.gender = genderElem.value;
         registrationData.qualificationType = qualType;
 
-        // Build step 1 fields based on qualification type
         const container = document.getElementById('qualificationDetails');
-        if (qualType === '12TH') {
+        if (qualType === 'TWELFTH') {
             container.innerHTML = `
                 <div class="form-group"><label>10th Board:</label><input type="text" id="tenthBoard" required></div>
                 <div class="form-group"><label>10th Year:</label><input type="number" id="tenthYear" required></div>
@@ -269,7 +223,7 @@
                 <div class="form-group"><label>12th Board:</label><input type="text" id="twelfthBoard" required></div>
                 <div class="form-group"><label>12th Year:</label><input type="number" id="twelfthYear" required></div>
                 <div class="form-group"><label>12th Percentage:</label><input type="number" step="any" id="twelfthPercentage" required></div>
-                <div class="form-group"><label>Stream (e.g., Bio Maths, Bio Chemistry, Computer Science):</label><input type="text" id="twelfthStream" required></div>
+                <div class="form-group"><label>Stream:</label><input type="text" id="twelfthStream" required></div>
             `;
         } else if (qualType === 'ITI') {
             container.innerHTML = `
@@ -315,7 +269,6 @@
 
     function goToStep0() { showStep('step0'); }
 
-    // Step 1 to Step 2: collect qualification data
     function goToStep2() {
         const qualType = registrationData.qualificationType;
         const tenthBoard = document.getElementById('tenthBoard')?.value;
@@ -329,7 +282,7 @@
         registrationData.tenthYear = parseInt(tenthYear);
         registrationData.tenthPercentage = parseFloat(tenthPercentage);
 
-        if (qualType === '12TH') {
+        if (qualType === 'TWELFTH') {
             const twelfthBoard = document.getElementById('twelfthBoard')?.value;
             const twelfthYear = document.getElementById('twelfthYear')?.value;
             const twelfthPercentage = document.getElementById('twelfthPercentage')?.value;
@@ -368,73 +321,74 @@
             registrationData.diplomaPercentage = parseFloat(diplomaPercentage);
         }
 
-        // Load departments and courses for step 2
-        loadDepartments();
-        // Prepare certificate upload section based on qualification type
         const certDiv = document.getElementById('certUploads');
-        if (qualType === '12TH') {
+        if (qualType === 'TWELFTH') {
             certDiv.innerHTML = `
-                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf"></div>
-                <div><label>12th Marksheet (PDF):</label><input type="file" id="cert12" accept="application/pdf"></div>
+                <h3>Upload Certificates</h3>
+                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf" required></div>
+                <div><label>12th Marksheet (PDF):</label><input type="file" id="cert12" accept="application/pdf" required></div>
             `;
         } else if (qualType === 'ITI') {
             certDiv.innerHTML = `
-                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf"></div>
-                <div><label>ITI Certificate (PDF):</label><input type="file" id="certIti" accept="application/pdf"></div>
+                <h3>Upload Certificates</h3>
+                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf" required></div>
+                <div><label>ITI Certificate (PDF):</label><input type="file" id="certIti" accept="application/pdf" required></div>
             `;
         } else if (qualType === 'DIPLOMA') {
             certDiv.innerHTML = `
-                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf"></div>
-                <div><label>Diploma Certificate (PDF):</label><input type="file" id="certDiploma" accept="application/pdf"></div>
+                <h3>Upload Certificates</h3>
+                <div><label>10th Marksheet (PDF):</label><input type="file" id="cert10" accept="application/pdf" required></div>
+                <div><label>Diploma Certificate (PDF):</label><input type="file" id="certDiploma" accept="application/pdf" required></div>
             `;
         }
+
+        loadDepartments();
         showStep('step2');
     }
 
-  async function loadDepartments() {
-    try {
-        const res = await fetch(`${API_BASE}/departments`);
-        if (!res.ok) {
-            console.error('Departments fetch failed:', res.status);
-            return;
+    async function loadDepartments() {
+        try {
+            const res = await fetch(`${API_BASE}/departments`);
+            if (!res.ok) throw new Error('Failed to load departments');
+            const departments = await res.json();
+            const deptSelect = document.getElementById('regDepartment');
+            deptSelect.innerHTML = '<option value="">Select Department</option>';
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.code;
+                option.textContent = dept.name;
+                deptSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error(err);
+            document.getElementById('regDepartment').innerHTML = '<option value="">Error loading departments</option>';
         }
-        const departments = await res.json();
-        console.log('Departments loaded:', departments);
-        const deptSelect = document.getElementById('regDepartment');
-        deptSelect.innerHTML = '<option value="">Select Department</option>';
-        departments.forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept.code;
-            option.textContent = dept.name;
-            deptSelect.appendChild(option);
-        });
-    } catch (err) {
-        console.error('Error loading departments:', err);
     }
-}
-    
 
     document.getElementById('regDepartment').addEventListener('change', async (e) => {
         const deptCode = e.target.value;
         const coursesDiv = document.getElementById('regCourses');
         if (!deptCode) { coursesDiv.innerHTML = '<em>Select a department first</em>'; return; }
-        const res = await fetch(`${API_BASE}/public/courses/by-department/${deptCode}`);
-        const courses = await res.json();
-        if (courses.length === 0) { coursesDiv.innerHTML = '<em>No courses available</em>'; return; }
-        coursesDiv.innerHTML = '';
-        courses.forEach(course => {
-            const label = document.createElement('label');
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.value = course.code;
-            label.appendChild(cb);
-            label.appendChild(document.createTextNode(` ${course.title} (${course.teacher1} / ${course.teacher2})`));
-            coursesDiv.appendChild(label);
-        });
+        try {
+            const res = await fetch(`${API_BASE}/public/courses/by-department/${deptCode}`);
+            const courses = await res.json();
+            if (courses.length === 0) { coursesDiv.innerHTML = '<em>No courses available</em>'; return; }
+            coursesDiv.innerHTML = '';
+            courses.forEach(course => {
+                const label = document.createElement('label');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = course.code;
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(` ${course.title} (${course.teacher1} / ${course.teacher2})`));
+                coursesDiv.appendChild(label);
+            });
+        } catch (err) {
+            coursesDiv.innerHTML = '<em>Error loading courses</em>';
+        }
     });
 
-    // Step 2 to Step 3: collect department, courses, password, files, and send OTP
-    function nextStep() {
+    function submitRegistration() {
         const department = document.getElementById('regDepartment').value;
         const selectedCourses = Array.from(document.querySelectorAll('#regCourses input:checked')).map(cb => cb.value);
         const password = document.getElementById('regPassword').value;
@@ -454,95 +408,52 @@
         registrationData.selectedCourses = selectedCourses;
         registrationData.password = password;
 
-        // Gather files
         registrationFiles.photo = document.getElementById('regPhoto').files[0];
         registrationFiles.cert10 = document.getElementById('cert10')?.files[0];
-        if (registrationData.qualificationType === '12TH') {
+        if (registrationData.qualificationType === 'TWELFTH') {
             registrationFiles.cert12 = document.getElementById('cert12')?.files[0];
-        } else if (registrationData.qualificationType === 'ITI') {
-            registrationFiles.certIti = document.getElementById('certIti')?.files[0];
-        } else if (registrationData.qualificationType === 'DIPLOMA') {
-            registrationFiles.certDiploma = document.getElementById('certDiploma')?.files[0];
-        }
-
-        // Send OTP
-        sendOtp(registrationData.email);
-        document.getElementById('otpEmail').innerText = registrationData.email;
-        showStep('step3');
-    }
-
-    async function sendOtp(email) {
-        try {
-            const res = await fetch(`${API_BASE}/otp/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                document.getElementById('step2Message').innerHTML = `<div class="error">${data.message || 'Failed to send OTP'}</div>`;
-                showStep('step2');
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    async function resendOtp() {
-        await sendOtp(registrationData.email);
-        document.getElementById('otpMessage').innerHTML = '<div class="success">OTP resent. Check your email.</div>';
-    }
-
-    async function verifyOtp() {
-        const otp = document.getElementById('otpInput').value;
-        if (!otp) {
-            document.getElementById('otpMessage').innerHTML = '<div class="error">Please enter OTP</div>';
-            return;
-        }
-        // Verify OTP
-        try {
-            const res = await fetch(`${API_BASE}/otp/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: registrationData.email, otp: otp })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                document.getElementById('otpMessage').innerHTML = `<div class="error">${data.message || 'Invalid OTP'}</div>`;
+            if (!registrationFiles.cert10 || !registrationFiles.cert12) {
+                document.getElementById('step2Message').innerHTML = '<div class="error">Please upload both 10th and 12th marksheets.</div>';
                 return;
             }
-            // OTP verified, now submit registration
-            const formData = new FormData();
-            formData.append('student', new Blob([JSON.stringify(registrationData)], { type: 'application/json' }));
-            if (registrationFiles.photo) formData.append('photo', registrationFiles.photo);
-            if (registrationFiles.cert10) formData.append('cert10', registrationFiles.cert10);
-            if (registrationFiles.cert12) formData.append('cert12', registrationFiles.cert12);
-            if (registrationFiles.certIti) formData.append('certIti', registrationFiles.certIti);
-            if (registrationFiles.certDiploma) formData.append('certDiploma', registrationFiles.certDiploma);
-
-            const regRes = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                body: formData
-            });
-            const regText = await regRes.text();
-            if (regRes.ok) {
-                document.getElementById('otpMessage').innerHTML = `<div class="success">${regText}</div>`;
-                setTimeout(() => {
-                    showLogin();
-                }, 2000);
-            } else {
-                document.getElementById('otpMessage').innerHTML = `<div class="error">${regText}</div>`;
+        } else if (registrationData.qualificationType === 'ITI') {
+            registrationFiles.certIti = document.getElementById('certIti')?.files[0];
+            if (!registrationFiles.cert10 || !registrationFiles.certIti) {
+                document.getElementById('step2Message').innerHTML = '<div class="error">Please upload both 10th marksheet and ITI certificate.</div>';
+                return;
             }
-        } catch (err) {
-            document.getElementById('otpMessage').innerHTML = '<div class="error">Network error. Please try again.</div>';
+        } else if (registrationData.qualificationType === 'DIPLOMA') {
+            registrationFiles.certDiploma = document.getElementById('certDiploma')?.files[0];
+            if (!registrationFiles.cert10 || !registrationFiles.certDiploma) {
+                document.getElementById('step2Message').innerHTML = '<div class="error">Please upload both 10th marksheet and Diploma certificate.</div>';
+                return;
+            }
         }
+
+        const formData = new FormData();
+        formData.append('student', new Blob([JSON.stringify(registrationData)], { type: 'application/json' }));
+        if (registrationFiles.photo) formData.append('photo', registrationFiles.photo);
+        if (registrationFiles.cert10) formData.append('cert10', registrationFiles.cert10);
+        if (registrationFiles.cert12) formData.append('cert12', registrationFiles.cert12);
+        if (registrationFiles.certIti) formData.append('certIti', registrationFiles.certIti);
+        if (registrationFiles.certDiploma) formData.append('certDiploma', registrationFiles.certDiploma);
+
+        fetch(`${API_BASE}/auth/register`, { method: 'POST', body: formData })
+            .then(async res => {
+                if (res.ok) {
+                    const msg = await res.text();
+                    document.getElementById('step2Message').innerHTML = `<div class="success">${msg}</div>`;
+                    setTimeout(() => showLogin(), 2000);
+                } else {
+                    const error = await res.text();
+                    document.getElementById('step2Message').innerHTML = `<div class="error">${error}</div>`;
+                }
+            })
+            .catch(err => {
+                document.getElementById('step2Message').innerHTML = `<div class="error">Network error: ${err.message}</div>`;
+            });
     }
 
-    function goBackToStep2() {
-        showStep('step2');
-    }
-
-    // Login submit
     document.getElementById('login').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = { rollNumber: document.getElementById('loginRollNumber').value, password: document.getElementById('loginPassword').value };
@@ -566,7 +477,6 @@
         document.getElementById('loginForm').classList.remove('active-form');
         document.getElementById('registerForm').classList.add('active-form');
         showStep('step0');
-        // Reset data
         registrationData = {};
         registrationFiles = {};
         document.getElementById('step0Form').reset();

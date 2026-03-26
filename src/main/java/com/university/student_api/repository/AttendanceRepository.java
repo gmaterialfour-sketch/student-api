@@ -1,14 +1,10 @@
 package com.university.student_api.repository;
 
+import com.university.student_api.entity.Attendance;
+import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import com.university.student_api.entity.Attendance;
-
-@Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    List<Attendance> findByStudentRollNumber(String studentRollNumber);
-    List<Attendance> findByCourseCode(String courseCode);
+    // Finds all attendance records for a given student roll number
+    List<Attendance> findByStudentRollNumber(String rollNumber);
 }

@@ -1,22 +1,29 @@
 package com.university.student_api.dto;
 
+import com.university.student_api.entity.QualificationType;
+
 public class EducationalQualificationRequest {
     private String tenthBoard;
     private int tenthYear;
     private double tenthPercentage;
-    private String qualificationType; // "12TH", "DIPLOMA", "ITI"
-    // 12th fields
+    private QualificationType qualificationType;
+
+    // For 12th
     private String twelfthBoard;
     private int twelfthYear;
     private double twelfthPercentage;
-    // Diploma fields
-    private String diplomaBranch;
-    private int diplomaCredits;
-    // ITI fields
+    private String twelfthStream;
+
+    // For ITI
     private String itiTrade;
     private int itiYear;
     private double itiPercentage;
-    // getters/setters
+
+    // For Diploma
+    private String diplomaBranch;
+    private int diplomaCredits;
+    private int diplomaYear;
+    private double diplomaPercentage;
     public String getTenthBoard() {
         return tenthBoard;
     }
@@ -35,10 +42,10 @@ public class EducationalQualificationRequest {
     public void setTenthPercentage(double tenthPercentage) {
         this.tenthPercentage = tenthPercentage;
     }
-    public String getQualificationType() {
+    public QualificationType getQualificationType() {
         return qualificationType;
     }
-    public void setQualificationType(String qualificationType) {
+    public void setQualificationType(QualificationType qualificationType) {
         this.qualificationType = qualificationType;
     }
     public String getTwelfthBoard() {
@@ -59,17 +66,11 @@ public class EducationalQualificationRequest {
     public void setTwelfthPercentage(double twelfthPercentage) {
         this.twelfthPercentage = twelfthPercentage;
     }
-    public String getDiplomaBranch() {
-        return diplomaBranch;
+    public String getTwelfthStream() {
+        return twelfthStream;
     }
-    public void setDiplomaBranch(String diplomaBranch) {
-        this.diplomaBranch = diplomaBranch;
-    }
-    public int getDiplomaCredits() {
-        return diplomaCredits;
-    }
-    public void setDiplomaCredits(int diplomaCredits) {
-        this.diplomaCredits = diplomaCredits;
+    public void setTwelfthStream(String twelfthStream) {
+        this.twelfthStream = twelfthStream;
     }
     public String getItiTrade() {
         return itiTrade;
@@ -89,4 +90,30 @@ public class EducationalQualificationRequest {
     public void setItiPercentage(double itiPercentage) {
         this.itiPercentage = itiPercentage;
     }
+    public String getDiplomaBranch() {
+        return diplomaBranch;
+    }
+    public void setDiplomaBranch(String diplomaBranch) {
+        this.diplomaBranch = diplomaBranch;
+    }
+    public int getDiplomaCredits() {
+        return diplomaCredits;
+    }
+    public void setDiplomaCredits(int diplomaCredits) {
+        this.diplomaCredits = diplomaCredits;
+    }
+    public int getDiplomaYear() {
+        return diplomaYear;
+    }
+    public void setDiplomaYear(int diplomaYear) {
+        this.diplomaYear = diplomaYear;
+    }
+    public double getDiplomaPercentage() {
+        return diplomaPercentage;
+    }
+    public void setDiplomaPercentage(double diplomaPercentage) {
+        this.diplomaPercentage = diplomaPercentage;
+    }
+
+    // Getters and setters (use IDE to generate all)
 }

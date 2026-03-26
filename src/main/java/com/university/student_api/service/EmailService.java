@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-
     @Autowired
     private JavaMailSender mailSender;
 
@@ -24,8 +22,7 @@ public class EmailService {
             mailSender.send(message);
             logger.info("OTP email sent to {}", to);
         } catch (Exception e) {
-            // Fallback: log the OTP so the user can still see it
-            logger.error("Failed to send email to {}. Using console fallback.", to);
+            logger.error("Failed to send email to {}. Using console fallback.", to, e);
             logger.info("=== OTP for {} is: {} ===", to, otp);
         }
     }

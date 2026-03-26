@@ -7,21 +7,25 @@ import jakarta.persistence.*;
 public class RollNumberSequence {
 
     @Id
-    private Long id;
-    private Long currentValue;
+    private String departmentCode;
+    private long currentValue;
 
-    // Constructors
+    @Version
+    private long version;
+
     public RollNumberSequence() {}
 
-    public RollNumberSequence(Long id, Long currentValue) {
-        this.id = id;
+    public RollNumberSequence(String departmentCode, long currentValue) {
+        this.departmentCode = departmentCode;
         this.currentValue = currentValue;
     }
 
-    // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getDepartmentCode() { return departmentCode; }
+    public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
 
-    public Long getCurrentValue() { return currentValue; }
-    public void setCurrentValue(Long currentValue) { this.currentValue = currentValue; }
+    public long getCurrentValue() { return currentValue; }
+    public void setCurrentValue(long currentValue) { this.currentValue = currentValue; }
+
+    public long getVersion() { return version; }
+    public void setVersion(long version) { this.version = version; }
 }

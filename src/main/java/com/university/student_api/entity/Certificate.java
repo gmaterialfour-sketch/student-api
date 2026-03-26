@@ -1,7 +1,17 @@
 package com.university.student_api.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "certificates")
@@ -11,58 +21,39 @@ public class Certificate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String studentRollNumber;
+    @Enumerated(EnumType.STRING)
+    private CertificateType certificateType;   // ✅ Use the enum
 
-    @Column(nullable = false)
-    private String certificateType;
+    private String fileName;
+    private String contentType;
 
     @Lob
     private byte[] fileData;
 
-    private String fileName;
-    private String contentType;
     private LocalDateTime uploadDate;
-    private boolean verified = false;
+    private boolean verified;
     private LocalDateTime verificationDate;
     private String verifiedBy;
 
-    // Constructors
-    public Certificate() {}
-
-    public Certificate(Long id, String studentRollNumber, String certificateType, byte[] fileData,
-                       String fileName, String contentType, LocalDateTime uploadDate,
-                       boolean verified, LocalDateTime verificationDate, String verifiedBy) {
-        this.id = id;
-        this.studentRollNumber = studentRollNumber;
-        this.certificateType = certificateType;
-        this.fileData = fileData;
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.uploadDate = uploadDate;
-        this.verified = verified;
-        this.verificationDate = verificationDate;
-        this.verifiedBy = verifiedBy;
-    }
+    @ManyToOne
+    @JoinColumn(name = "student_roll_number", nullable = false)
+    private Student student;   // ✅ Reference to Student entity
 
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getStudentRollNumber() { return studentRollNumber; }
-    public void setStudentRollNumber(String studentRollNumber) { this.studentRollNumber = studentRollNumber; }
-
-    public String getCertificateType() { return certificateType; }
-    public void setCertificateType(String certificateType) { this.certificateType = certificateType; }
-
-    public byte[] getFileData() { return fileData; }
-    public void setFileData(byte[] fileData) { this.fileData = fileData; }
+    public CertificateType getCertificateType() { return certificateType; }
+    public void setCertificateType(CertificateType certificateType) { this.certificateType = certificateType; }
 
     public String getFileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
 
     public String getContentType() { return contentType; }
     public void setContentType(String contentType) { this.contentType = contentType; }
+
+    public byte[] getFileData() { return fileData; }
+    public void setFileData(byte[] fileData) { this.fileData = fileData; }
 
     public LocalDateTime getUploadDate() { return uploadDate; }
     public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
@@ -75,4 +66,7 @@ public class Certificate {
 
     public String getVerifiedBy() { return verifiedBy; }
     public void setVerifiedBy(String verifiedBy) { this.verifiedBy = verifiedBy; }
+
+    public Student getStudent() { return student; }
+    public void setStudent(Student student) { this.student = student; }
 }

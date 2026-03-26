@@ -1,64 +1,55 @@
 student-api/
 ├── pom.xml
-├── src/main/java/com/university/student_api/
-│   ├── StudentApiApplication.java
-│   ├── config/
-│   │   └── DataInitializer.java
-│   ├── controller/
-│   │   ├── AdminController.java
-│   │   ├── AttendanceController.java
-│   │   ├── AuthController.java
-│   │   ├── CourseController.java
-│   │   ├── DepartmentController.java
-│   │   ├── EnrollmentController.java
-│   │   ├── OtpController.java
-│   │   ├── PublicCourseController.java
-│   │   ├── StudentController.java
-│   │   └── StudentProfileController.java
-│   ├── dto/
-│   │   ├── AttendanceRequest.java
-│   │   ├── AuthResponse.java
-│   │   ├── CourseRequest.java
-│   │   ├── EducationalQualificationRequest.java
-│   │   ├── EnrollmentRequest.java
-│   │   ├── LoginRequest.java
-│   │   └── RegisterRequest.java
-│   ├── entity/
-│   │   ├── Attendance.java
-│   │   ├── Certificate.java
-│   │   ├── Course.java
-│   │   ├── Department.java
-│   │   ├── EducationalQualification.java
-│   │   ├── Enrollment.java
-│   │   ├── EnrollmentId.java
-│   │   ├── Otp.java
-│   │   ├── PaymentProof.java
-│   │   ├── RollNumberSequence.java
-│   │   ├── Student.java
-│   │   └── StudentPhoto.java
-│   ├── repository/
-│   │   ├── AttendanceRepository.java
-│   │   ├── CertificateRepository.java
-│   │   ├── CourseRepository.java
-│   │   ├── DepartmentRepository.java
-│   │   ├── EducationalQualificationRepository.java
-│   │   ├── EnrollmentRepository.java
-│   │   ├── OtpRepository.java
-│   │   ├── PaymentProofRepository.java
-│   │   ├── RollNumberSequenceRepository.java
-│   │   ├── StudentPhotoRepository.java
-│   │   └── StudentRepository.java
-│   ├── security/
-│   │   ├── CustomUserDetailsService.java
-│   │   ├── JwtFilter.java
-│   │   ├── JwtUtil.java
-│   │   └── SecurityConfig.java
-│   └── service/
-│       ├── AuthService.java
-│       └── EmailService.java
-└── src/main/resources/
-    ├── application.properties
-    └── static/
-        ├── admin-dashboard.html
-        ├── dashboard.html
-        └── index.html
+├── src/
+│   ├── main/
+│   │   ├── java/com/university/student_api/
+│   │   │   ├── StudentApiApplication.java
+│   │   │   ├── config/
+│   │   │   │   └── SecurityConfig.java
+│   │   │   ├── controller/
+│   │   │   │   ├── AttendanceController.java
+│   │   │   │   ├── AuthController.java
+│   │   │   │   ├── CourseController.java
+│   │   │   │   ├── DepartmentController.java
+│   │   │   │   └── StudentController.java
+│   │   │   ├── entity/
+│   │   │   │   ├── Attendance.java
+│   │   │   │   ├── AttendanceStatus.java
+│   │   │   │   ├── Certificate.java
+│   │   │   │   ├── CertificateType.java
+│   │   │   │   ├── Course.java
+│   │   │   │   ├── Department.java
+│   │   │   │   ├── EducationalQualification.java
+│   │   │   │   ├── Enrollment.java
+│   │   │   │   ├── EnrollmentId.java
+│   │   │   │   ├── Otp.java
+│   │   │   │   ├── PaymentProof.java
+│   │   │   │   ├── QualificationType.java
+│   │   │   │   ├── Role.java
+│   │   │   │   └── Student.java
+│   │   │   ├── repository/
+│   │   │   │   ├── AttendanceRepository.java
+│   │   │   │   ├── CertificateRepository.java
+│   │   │   │   ├── CourseRepository.java
+│   │   │   │   ├── DepartmentRepository.java
+│   │   │   │   ├── EducationalQualificationRepository.java
+│   │   │   │   ├── EnrollmentRepository.java
+│   │   │   │   ├── OtpRepository.java
+│   │   │   │   ├── PaymentProofRepository.java
+│   │   │   │   └── StudentRepository.java
+│   │   │   ├── security/
+│   │   │   │   ├── CustomUserDetailsService.java
+│   │   │   │   └── JwtFilter.java
+│   │   │   ├── service/
+│   │   │   │   ├── AttendanceService.java
+│   │   │   │   ├── AuthService.java
+│   │   │   │   ├── EmailService.java
+│   │   │   │   ├── OtpService.java
+│   │   │   │   └── StudentService.java
+│   │   │   └── util/
+│   │   │       └── JwtUtil.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── static/
+│   │           ├── index.html
+│   │           └── dashboard.html

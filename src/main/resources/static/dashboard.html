@@ -5,9 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 1200px; margin: auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
         .profile-header {
             display: flex;
             align-items: center;
@@ -58,18 +76,52 @@
         .info-item { margin: 5px 0; }
         .label { font-weight: bold; color: #555; }
         .value { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #007bff; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
         tr:nth-child(even) { background-color: #f2f2f2; }
-        .logout { text-align: right; margin-bottom: 20px; }
-        button { padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
         button:hover { background-color: #c82333; }
-        .btn-secondary { background-color: #28a745; margin-left: 10px; }
+        .btn-secondary {
+            background-color: #28a745;
+            margin-left: 10px;
+        }
         .btn-secondary:hover { background-color: #218838; }
         input[type="file"] { display: none; }
         .verified { color: green; font-weight: bold; }
         .pending { color: orange; font-weight: bold; }
+        .upload-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .upload-area select, .upload-area button { margin: 0; }
+        .error-message { color: #dc3545; margin: 10px 0; }
+        .info-message { color: #666; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -88,24 +140,24 @@
     <h2>Enrolled Courses</h2>
     <div id="enrollments"></div>
 
-    <h2>Attendance</h2>
-    <div id="attendanceTable"></div>
+    <!-- <h2>Attendance</h2>
+    <div id="attendanceTable"></div> -->
 
     <h2>Educational Qualification Status</h2>
     <div id="qualificationStatus"></div>
 
-    <h2>Upload Certificates</h2>
-    <div>
-        <label>Select Certificate Type:</label>
+    <!-- <h2>Upload Certificates</h2>
+    <div class="upload-area">
         <select id="certType">
-            <option value="10TH">10th Marksheet</option>
-            <option value="12TH">12th Marksheet</option>
-            <option value="DIPLOMA">Diploma Certificate</option>
-            <option value="ITI">ITI Certificate</option>
+            <option value="TENTH_MARK_SHEET">10th Marksheet</option>
+            <option value="TWELFTH_MARK_SHEET">12th Marksheet</option>
+            <option value="DIPLOMA_CERTIFICATE">Diploma Certificate</option>
+            <option value="ITI_CERTIFICATE">ITI Certificate</option>
         </select>
         <input type="file" id="certFile" accept="application/pdf">
         <button onclick="uploadCertificate()" class="btn-secondary">Upload</button>
-    </div>
+    </div> -->
+
     <h2>Uploaded Certificates</h2>
     <div id="certificatesTable"></div>
 
@@ -117,36 +169,70 @@
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    if (!token || role !== 'STUDENT') window.location.href = '/index.html';
+    if (!token || role !== 'STUDENT') {
+        window.location.href = '/index.html';
+    }
+
+    // Helper for authenticated fetch – only redirect on 401/403
+    async function fetchWithAuth(url, options = {}) {
+        const headers = { 'Authorization': `Bearer ${token}`, ...options.headers };
+        const res = await fetch(url, { ...options, headers });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            window.location.href = '/index.html';
+        }
+        return res;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
 
     async function loadProfile() {
-        const res = await fetch(`${API_BASE}/student/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) throw new Error('Profile load failed');
-        const student = await res.json();
-        let deptName = student.department;
-        if (student.department && typeof student.department === 'object') deptName = student.department.name;
-        const html = `
-            <div class="info-item"><span class="label">Roll Number:</span> <span class="value">${escapeHtml(student.rollNumber)}</span></div>
-            <div class="info-item"><span class="label">Name:</span> <span class="value">${escapeHtml(student.name)}</span></div>
-            <div class="info-item"><span class="label">Full Name:</span> <span class="value">${escapeHtml(student.fullName)}</span></div>
-            <div class="info-item"><span class="label">Email:</span> <span class="value">${escapeHtml(student.email)}</span></div>
-            <div class="info-item"><span class="label">Address:</span> <span class="value">${escapeHtml(student.address)}</span></div>
-            <div class="info-item"><span class="label">Gender:</span> <span class="value">${escapeHtml(student.gender)}</span></div>
-            <div class="info-item"><span class="label">Department:</span> <span class="value">${escapeHtml(deptName)}</span></div>
-            <div class="info-item"><span class="label">Academic Year:</span> <span class="value">${student.academicYear}</span></div>
-        `;
-        document.getElementById('profileInfo').innerHTML = html;
+        try {
+            const res = await fetchWithAuth(`${API_BASE}/student/me`);
+            if (!res.ok) throw new Error('Profile load failed');
+            const student = await res.json();
+            let deptName = student.department;
+            if (student.department && typeof student.department === 'object') deptName = student.department.name;
+            const html = `
+                <div class="info-item"><span class="label">Roll Number:</span> <span class="value">${escapeHtml(student.rollNumber)}</span></div>
+                <div class="info-item"><span class="label">Name:</span> <span class="value">${escapeHtml(student.name)}</span></div>
+                <div class="info-item"><span class="label">Full Name:</span> <span class="value">${escapeHtml(student.fullName)}</span></div>
+                <div class="info-item"><span class="label">Email:</span> <span class="value">${escapeHtml(student.email)}</span></div>
+                <div class="info-item"><span class="label">Address:</span> <span class="value">${escapeHtml(student.address)}</span></div>
+                <div class="info-item"><span class="label">Gender:</span> <span class="value">${escapeHtml(student.gender)}</span></div>
+                <div class="info-item"><span class="label">Department:</span> <span class="value">${escapeHtml(deptName)}</span></div>
+                <div class="info-item"><span class="label">Academic Year:</span> <span class="value">${student.academicYear}</span></div>
+            `;
+            document.getElementById('profileInfo').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('profileInfo').innerHTML = '<p class="error-message">Error loading profile.</p>';
+        }
     }
 
     async function loadPhoto() {
         try {
-            const res = await fetch(`${API_BASE}/student/photo`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetchWithAuth(`${API_BASE}/student/photo`);
             if (res.ok) {
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
                 document.getElementById('profilePhoto').src = url;
+            } else {
+                // 404 or other – use placeholder
+                document.getElementById('profilePhoto').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"%3E%3C/path%3E%3Ccircle cx="12" cy="7" r="4"%3E%3C/circle%3E%3C/svg%3E';
             }
-        } catch(e) { console.log("No photo"); }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     document.getElementById('photoInput').addEventListener('change', async (e) => {
@@ -154,67 +240,88 @@
         if (!file) return;
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch(`${API_BASE}/student/photo`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
+        const res = await fetchWithAuth(`${API_BASE}/student/photo`, { method: 'POST', body: formData });
         if (res.ok) {
             alert('Photo updated');
             loadPhoto();
         } else {
-            alert('Upload failed');
+            const msg = await res.text();
+            alert('Upload failed: ' + msg);
         }
     });
 
     async function loadEnrollments() {
-        const res = await fetch(`${API_BASE}/student/enrollments`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) throw new Error('Enrollments load failed');
-        const enrollments = await res.json();
-        if (enrollments.length === 0) {
-            document.getElementById('enrollments').innerHTML = '<p>You are not enrolled in any courses.</p>';
-            return;
+        try {
+            const res = await fetchWithAuth(`${API_BASE}/student/enrollments`);
+            if (!res.ok) throw new Error('Enrollments load failed');
+            const enrollments = await res.json();
+            if (enrollments.length === 0) {
+                document.getElementById('enrollments').innerHTML = '<p class="info-message">You are not enrolled in any courses.</p>';
+                return;
+            }
+            let html = '<thead>   <th>Course Code</th><th>Course Title</th><th>Teacher(s)</th><th>Enrollment Date</th><th>Grade</th> </thead><tbody>';
+            enrollments.forEach(e => {
+                let courseTitle = e.course ? e.course.title : '';
+                let teacherStr = e.course ? `${e.course.teacher1} / ${e.course.teacher2}` : '';
+                let dateStr = e.enrollmentDate ? new Date(e.enrollmentDate).toLocaleString() : '';
+                html += `   <tr>
+                                <td>${escapeHtml(e.id?.courseCode || '')}</td>
+                                <td>${escapeHtml(courseTitle)}</td>
+                                <td>${escapeHtml(teacherStr)}</td>
+                                <td>${dateStr}</td>
+                                <td>${escapeHtml(e.grade || 'Not graded')}</td>
+                            </tr>`;
+            });
+            html += '</tbody>';
+            document.getElementById('enrollments').innerHTML = `   <table>${html}</table>`;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('enrollments').innerHTML = '<p class="error-message">Error loading enrollments.</p>';
         }
-        let html = '<thead><tr><th>Course Code</th><th>Course Title</th><th>Teacher(s)</th><th>Enrollment Date</th><th>Grade</th></tr></thead><tbody>';
-        enrollments.forEach(e => {
-            let courseTitle = e.course ? e.course.title : '';
-            let teacherStr = e.course ? `${e.course.teacher1} / ${e.course.teacher2}` : '';
-            let dateStr = e.enrollmentDate ? new Date(e.enrollmentDate).toLocaleString() : '';
-            html += `<tr><td>${escapeHtml(e.id?.courseCode || '')}</td><td>${escapeHtml(courseTitle)}</td><td>${escapeHtml(teacherStr)}</td><td>${dateStr}</td><td>${escapeHtml(e.grade || 'Not graded')}</td></tr>`;
-        });
-        html += '</tbody>';
-        document.getElementById('enrollments').innerHTML = `<table>${html}</table>`;
     }
 
     async function loadAttendance() {
-        const res = await fetch(`${API_BASE}/student/attendance`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) throw new Error('Attendance load failed');
-        const attendances = await res.json();
-        if (attendances.length === 0) {
-            document.getElementById('attendanceTable').innerHTML = '<p>No attendance records found.</p>';
-            return;
+        try {
+            const res = await fetchWithAuth(`${API_BASE}/student/attendance`);
+            if (!res.ok) throw new Error('Attendance load failed');
+            const attendances = await res.json();
+            if (attendances.length === 0) {
+                document.getElementById('attendanceTable').innerHTML = '<p class="info-message">No attendance records found.</p>';
+                return;
+            }
+            let html = '<thead>   <th>Course</th><th>Date</th><th>Status</th> </thead><tbody>';
+            attendances.forEach(a => {
+                let courseTitle = a.course ? a.course.title : '';
+                let status = a.present ? 'Present' : 'Absent';
+                html += `   <tr>
+                                <td>${escapeHtml(courseTitle)}</td>
+                                <td>${new Date(a.date).toLocaleDateString()}</td>
+                                <td>${status}</td>
+                            </tr>`;
+            });
+            html += '</tbody>';
+            document.getElementById('attendanceTable').innerHTML = `   <table>${html}</table>`;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('attendanceTable').innerHTML = '<p class="error-message">Error loading attendance.</p>';
         }
-        let html = '<thead><tr><th>Course</th><th>Date</th><th>Status</th></tr></thead><tbody>';
-        attendances.forEach(a => {
-            let courseTitle = a.course ? a.course.title : '';
-            let status = a.present ? 'Present' : 'Absent';
-            html += `<tr><td>${escapeHtml(courseTitle)}</td><td>${new Date(a.date).toLocaleDateString()}</td><td>${status}</td></tr>`;
-        });
-        html += '</tbody>';
-        document.getElementById('attendanceTable').innerHTML = `<table>${html}</table>`;
     }
 
     async function loadQualificationStatus() {
         try {
-            const res = await fetch(`${API_BASE}/student/qualification`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (res.ok) {
-                const q = await res.json();
-                const statusHtml = `<div class="${q.verified ? 'verified' : 'pending'}">${q.verified ? 'Verified ✓' : 'Pending Verification ⏳'}</div>`;
-                document.getElementById('qualificationStatus').innerHTML = `<p>Qualification Status: ${statusHtml}</p>`;
-            } else {
-                document.getElementById('qualificationStatus').innerHTML = '<p>Qualification not yet submitted.</p>';
+            const res = await fetchWithAuth(`${API_BASE}/student/qualification`);
+            if (res.status === 404) {
+                document.getElementById('qualificationStatus').innerHTML = '<p class="info-message">Qualification not yet submitted.</p>';
+                return;
             }
-        } catch(e) { console.log(e); }
+            if (!res.ok) throw new Error('Qualification load failed');
+            const q = await res.json();
+            const statusHtml = `<div class="${q.verified ? 'verified' : 'pending'}">${q.verified ? 'Verified ' : 'Pending Verification'}</div>`;
+            document.getElementById('qualificationStatus').innerHTML = `<p>Qualification Status: ${statusHtml}</p>`;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('qualificationStatus').innerHTML = '<p class="error-message">Error loading qualification status.</p>';
+        }
     }
 
     async function uploadCertificate() {
@@ -227,9 +334,8 @@
         const formData = new FormData();
         formData.append('type', certType);
         formData.append('file', fileInput.files[0]);
-        const res = await fetch(`${API_BASE}/student/certificate`, {
+        const res = await fetchWithAuth(`${API_BASE}/student/certificate`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
             body: formData
         });
         const msg = await res.text();
@@ -238,26 +344,38 @@
     }
 
     async function loadCertificates() {
-        const res = await fetch(`${API_BASE}/student/certificates`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const certs = await res.json();
-        if (certs.length === 0) {
-            document.getElementById('certificatesTable').innerHTML = '<p>No certificates uploaded.</p>';
-            return;
+        try {
+            const res = await fetchWithAuth(`${API_BASE}/student/certificates`);
+            if (!res.ok) throw new Error('Certificates load failed');
+            const certs = await res.json();
+            if (certs.length === 0) {
+                document.getElementById('certificatesTable').innerHTML = '<p class="info-message">No certificates uploaded.</p>';
+                return;
+            }
+            let html = '<thead>   <th>Type</th><th>File Name</th><th>Upload Date</th><th>Status</th> </thead><tbody>';
+            certs.forEach(c => {
+                html += `   <tr>
+                                <td>${escapeHtml(c.certificateType)}</td>
+                                <td>${escapeHtml(c.fileName)}</td>
+                                <td>${new Date(c.uploadDate).toLocaleString()}</td>
+                                <td class="${c.verified ? 'verified' : 'pending'}">${c.verified ? 'Verified ' : 'Pending'}</td>
+                            </tr>`;
+            });
+            html += '</tbody>';
+            document.getElementById('certificatesTable').innerHTML = `   <table>${html}</table>`;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('certificatesTable').innerHTML = '<p class="error-message">Error loading certificates.</p>';
         }
-        let html = '<thead><tr><th>Type</th><th>File Name</th><th>Upload Date</th><th>Status</th></tr></thead><tbody>';
-        certs.forEach(c => {
-            html += `<tr><td>${escapeHtml(c.certificateType)}</td><td>${escapeHtml(c.fileName)}</td><td>${new Date(c.uploadDate).toLocaleString()}</td><td class="${c.verified ? 'verified' : 'pending'}">${c.verified ? 'Verified ✓' : 'Pending ⏳'}</td></tr>`;
-        });
-        html += '</tbody>';
-        document.getElementById('certificatesTable').innerHTML = `<table>${html}</table>`;
     }
 
-    function logout() { localStorage.removeItem('token'); localStorage.removeItem('role'); window.location.href = '/index.html'; }
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        window.location.href = '/index.html';
+    }
 
+    // Initial load
     loadProfile();
     loadPhoto();
     loadEnrollments();

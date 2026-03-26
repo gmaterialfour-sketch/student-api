@@ -1,42 +1,29 @@
 package com.university.student_api.controller;
 
 import com.university.student_api.entity.Student;
-import com.university.student_api.repository.StudentRepository;
+import com.university.student_api.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/student")
 public class StudentController {
 
     @Autowired
-    private StudentRepository studentRepository;
+    private StudentService studentService;
 
     @GetMapping("/me")
-    public ResponseEntity<Student> getMyProfile() {
-        String rollNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        return studentRepository.findById(rollNumber)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<Student> updateMyProfile(@RequestBody Student updatedStudent) {
-        String rollNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        return studentRepository.findById(rollNumber)
-                .map(existing -> {
-                    existing.setName(updatedStudent.getName());
-                    existing.setFullName(updatedStudent.getFullName());
-                    existing.setEmail(updatedStudent.getEmail());
-                    existing.setAddress(updatedStudent.getAddress());
-                    existing.setDepartment(updatedStudent.getDepartment());
-                    existing.setSelectedCourse(updatedStudent.getSelectedCourse());
-                    existing.setAcademicYear(updatedStudent.getAcademicYear());
-                    studentRepository.save(existing);
-                    return ResponseEntity.ok(existing);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getCurrentStudent(Principal principal) {
+        String rollNumber = principal.getName();
+        Student student = studentService.findByRollNumber(rollNumber);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(student);
     }
 }
